@@ -1,0 +1,20 @@
+import { Router, Request, Response } from 'express';
+import Container from "typedi";
+import { AuthenticationService } from "../../../services/common/AuthenticationService";
+import { ResponseWrapper } from '../../responseWrapper';
+import { validate } from '../../validators';
+import { adminLoginSchema } from '../../validators/auth';
+
+export default (router: Router) => {
+    const authService = Container.get(AuthenticationService);
+
+    router.post('/login', validate(adminLoginSchema), async (req: Request, res: Response) => {
+        try {
+            const { email, password } = req.body;
+            const result = await authService.adminLogin(email, password);
+            return ResponseWrapper.success(res, result, 'Admin logged in successfully');
+        } catch (error: any) {
+            return ResponseWrapper.error(res, error.message);
+        }
+    });
+}

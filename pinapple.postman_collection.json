@@ -1,0 +1,3116 @@
+{
+  "info": {
+    "_postman_id": "5e94a770-0862-4c7e-b535-8cd5b6860834",
+    "name": "pinapple",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "18663627",
+    "_collection_link": "https://go.postman.co/collection/18663627-5e94a770-0862-4c7e-b535-8cd5b6860834?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Admin Apis",
+      "item": [
+        {
+          "name": "Get Users",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"chatId\":5,\r\n    \"message\":\"Hii Kapil\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}users",
+              "host": [
+                "{{ADMIN_BASE_URL}}users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Users",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Kapil Jangid\",\r\n    \"email\":\"shikhamishraa12@gmail.com\",\r\n    \"password\":\"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}users",
+              "host": [
+                "{{ADMIN_BASE_URL}}users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Data",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Kapil Jangid\",\r\n    \"email\":\"shikhamishra@gmail.com\",\r\n    \"password\":\"123456\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}users/7",
+              "host": [
+                "{{ADMIN_BASE_URL}}users"
+              ],
+              "path": [
+                "7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\":\"Kapil Jangid\",\r\n    \"email\":\"shikhamishra@gmail.com\",\r\n    \"password\":\"123456\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}users/7",
+              "host": [
+                "{{ADMIN_BASE_URL}}users"
+              ],
+              "path": [
+                "7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subscriptions",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subscription Detail",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions/3",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ],
+              "path": [
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\":2,\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions/2",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ],
+              "path": [
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\":2,\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions/2",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ],
+              "path": [
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Subscription",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\":2,\r\n    \"userId\":1,\r\n    \"stripeId\":\"lkdshfkjhslkj\",\r\n    \"stripeStatus\":\"Active\",\r\n    \"name\":\"BASIC\",\r\n    \"stripePrice\":\"500\"\r\n}"
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions/user/1",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions"
+              ],
+              "path": [
+                "user",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Subscription Items",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"subscriptionId\":1,\r\n    \"stripeId\":\"kshdid\",\r\n    \"stripeProduct\":\"sd\",\r\n    \"stripePrice\":\"sahkjabd\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions_items",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions_items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Subscription Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\":1,\r\n    \"quantity\":10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions_items/1",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions_items"
+              ],
+              "path": [
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Subscription Item",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\":1,\r\n    \"quantity\":10\r\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{ADMIN_BASE_URL}}subscriptions_items/1",
+              "host": [
+                "{{ADMIN_BASE_URL}}subscriptions_items"
+              ],
+              "path": [
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Feed Media",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"feedId\":1\r\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}feeds/media/7",
+              "host": [
+                "{{BASE_URL}}feeds"
+              ],
+              "path": [
+                "media",
+                "7"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"ashish@gmail.com\",\r\n  \"password\": \"123456789\",\r\n  \"deviceType\": \"android\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}auth/login",
+          "host": [
+            "{{BASE_URL}}auth"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Profile",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\":\"ashish\",\r\n    \"bio\":\"this is my latest bio\",\r\n    \"dob\":\"2001-12-02\",\r\n    \"genderId\":1,\r\n    \"pronounId\":2,\r\n    \"sexualityId\":3,\r\n    \"bodyTypeId\":5,\r\n    \"smokingTypeId\":1,\r\n    \"drinkingTypeId\":3,\r\n    \"religionId\":2,\r\n    \"heightInCm\":23,\r\n    \"location\":\"Jaipur\",\r\n    \"lat\":12.334,\r\n    \"lng\":13.23\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}profile",
+          "host": [
+            "{{BASE_URL}}profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Profile Data",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1,\r\n    \"text\":\"dfhgvdhjndskjfdsjklm\"\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}profile",
+          "host": [
+            "{{BASE_URL}}profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\":\"Ashish\",\r\n    \"email\":\"ashish@gmail.com\",\r\n    \"password\":\"123456789\",\r\n    \"password_confirmation\":\"123456789\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}auth/register",
+          "host": [
+            "{{BASE_URL}}auth"
+          ],
+          "path": [
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Settings",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}settings",
+          "host": [
+            "{{BASE_URL}}settings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Verify Otp",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"ashish@gmail.com\",\r\n  \"token\":\"5V3EVG\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}auth/verify_email",
+          "host": [
+            "{{BASE_URL}}auth"
+          ],
+          "path": [
+            "verify_email"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Forgot Password",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\":\"jangidkapilyashu@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}auth/forgot_password",
+          "host": [
+            "{{BASE_URL}}auth"
+          ],
+          "path": [
+            "forgot_password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reset Password",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"password\":\"12345678\",\r\n    \"password_confirmation\":\"12345678\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}auth/change_password",
+          "host": [
+            "{{BASE_URL}}auth"
+          ],
+          "path": [
+            "change_password"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Feed",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"content\":\"My New Post\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Feed Detail",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/3",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Feed",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"feedId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get my feeds",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Feed Comment",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"comment\":\"This is first comment\",\r\n    \"parentId\":4,\r\n    \"feedId\":3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/comment",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "comment"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Comment",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"commentId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/comment",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "comment"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Notifications",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}notifications",
+          "host": [
+            "{{BASE_URL}}notifications"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Unseen Notification",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}notifications/unseen",
+          "host": [
+            "{{BASE_URL}}notifications"
+          ],
+          "path": [
+            "unseen"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Winks",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}winks",
+          "host": [
+            "{{BASE_URL}}winks"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Wink",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}winks",
+          "host": [
+            "{{BASE_URL}}winks"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Review",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1,\r\n    \"text\":\"dfhgvdhjndskjfdsjklm\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reviews",
+          "host": [
+            "{{BASE_URL}}reviews"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Review",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}reviews",
+          "host": [
+            "{{BASE_URL}}reviews"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Review",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}reviews/1",
+          "host": [
+            "{{BASE_URL}}reviews"
+          ],
+          "path": [
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get User Review",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reviews/user",
+          "host": [
+            "{{BASE_URL}}reviews"
+          ],
+          "path": [
+            "user"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Send Freind Request",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends",
+          "host": [
+            "{{BASE_URL}}friends"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Friends",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends",
+          "host": [
+            "{{BASE_URL}}friends"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Pending Request",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends/requests",
+          "host": [
+            "{{BASE_URL}}friends"
+          ],
+          "path": [
+            "requests"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Accept Friend",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"requestId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends/accept",
+          "host": [
+            "{{BASE_URL}}friends"
+          ],
+          "path": [
+            "accept"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reject Friend",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"requestId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends/reject",
+          "host": [
+            "{{BASE_URL}}friends"
+          ],
+          "path": [
+            "reject"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get My Pendings Request",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"requestId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}friends/pendings",
+          "host": [
+            "{{BASE_URL}}friends"
+          ],
+          "path": [
+            "pendings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Friend",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}friends/2",
+          "host": [
+            "{{BASE_URL}}friends"
+          ],
+          "path": [
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Send Follow request",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}followings",
+          "host": [
+            "{{BASE_URL}}followings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Followings",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}followings",
+          "host": [
+            "{{BASE_URL}}followings"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Follow Request",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}followings/requests",
+          "host": [
+            "{{BASE_URL}}followings"
+          ],
+          "path": [
+            "requests"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Accept Follow request",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"requestId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}followings/accept",
+          "host": [
+            "{{BASE_URL}}followings"
+          ],
+          "path": [
+            "accept"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reject Follow request",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"requestId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}followings/reject",
+          "host": [
+            "{{BASE_URL}}followings"
+          ],
+          "path": [
+            "reject"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Followings",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}followings/1",
+          "host": [
+            "{{BASE_URL}}followings"
+          ],
+          "path": [
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Search Users",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}users?query=ashish",
+          "host": [
+            "{{BASE_URL}}users"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "ashish"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "User Detail",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}users/1",
+          "host": [
+            "{{BASE_URL}}users"
+          ],
+          "path": [
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Events",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Kapil",
+              "type": "text",
+              "uuid": "6ba23b28-9a7f-4324-95ff-49f272f4523b"
+            },
+            {
+              "key": "description",
+              "value": "This is name",
+              "type": "text",
+              "uuid": "4a010477-2749-4de2-bc3a-20bd66ccf5eb"
+            },
+            {
+              "key": "rules",
+              "value": "this is rules",
+              "type": "text",
+              "uuid": "c2180ecd-fcf0-47ac-a4e3-97fe3a7e82db"
+            },
+            {
+              "key": "location",
+              "value": "Jainpur",
+              "type": "text",
+              "uuid": "f31073d3-6af9-4bbe-98fd-c263e7b391d1"
+            },
+            {
+              "key": "lat",
+              "value": "12.23",
+              "type": "text",
+              "uuid": "a4de5ef1-55be-4012-836f-6554677f522a"
+            },
+            {
+              "key": "lng",
+              "value": "12.12",
+              "type": "text",
+              "uuid": "65588623-f7b6-4d01-8dd2-aa31a58e33b4"
+            },
+            {
+              "key": "capacity",
+              "value": "3",
+              "type": "text",
+              "uuid": "555ec5ca-93cf-416e-94e8-bc5b61293d8c"
+            },
+            {
+              "key": "type",
+              "value": "party",
+              "type": "text",
+              "uuid": "66ca9ac8-f3fb-44c7-80e3-e3acd97a0601"
+            },
+            {
+              "key": "visibility",
+              "value": "private",
+              "type": "text",
+              "uuid": "f3bc9386-cb55-4a3d-8a7b-bad2d99eeb41"
+            },
+            {
+              "key": "startsAt",
+              "value": "10-12-2001",
+              "type": "text",
+              "uuid": "1b97cfce-ced4-4a7f-8a95-b6b0f187fcdc"
+            },
+            {
+              "key": "endsAt",
+              "value": "10-12-2001",
+              "type": "text",
+              "uuid": "dd77f684-5311-4339-85f0-2ae1c527c31c"
+            },
+            {
+              "key": "photo",
+              "type": "file",
+              "uuid": "a69cd85e-83f1-4a02-964c-8f0e49399586",
+              "src": "/C:/Users/Lenovo/Pictures/download (2).jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events",
+          "host": [
+            "{{BASE_URL}}events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get My Events",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}events/my",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "my"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get Public Events",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}events",
+          "host": [
+            "{{BASE_URL}}events"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Event",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}events/1",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Event Interested",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"eventId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events/interested",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "interested"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Event Not Interested",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"eventId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events/not-interested",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "not-interested"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Event Attending",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"eventId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events/attending",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "attending"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Event Not Attending",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"eventId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events/not-attending",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "not-attending"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Event Status",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}events/2/status",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "2",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "My Attending Events",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "",
+              "type": "file",
+              "uuid": "a72df6e2-860e-427f-84e2-88350ba7872d",
+              "value": null
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}events/attending/me",
+          "host": [
+            "{{BASE_URL}}events"
+          ],
+          "path": [
+            "attending",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Feed Media",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "bannerImage",
+              "type": "file",
+              "uuid": "4e8ed98f-62a3-4684-a38b-6c1fc5461c62",
+              "src": "/C:/Users/Lenovo/Pictures/download (3).jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/upload_file",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "upload_file"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Block User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"blockedUserId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}users/block",
+          "host": [
+            "{{BASE_URL}}users"
+          ],
+          "path": [
+            "block"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Unblock User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"blockedUserId\":2\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}users/unblock",
+          "host": [
+            "{{BASE_URL}}users"
+          ],
+          "path": [
+            "unblock"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Blocked Users",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"blockedUserId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}users_blocked",
+          "host": [
+            "{{BASE_URL}}users_blocked"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Gallery",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "images",
+              "type": "file",
+              "uuid": "886b1ca1-19d6-466b-8a86-60c8f9b5e572",
+              "src": [
+                "/C:/Users/Lenovo/Pictures/download (2).jpg",
+                "/C:/Users/Lenovo/Pictures/download (2).jpg",
+                "/C:/Users/Lenovo/Pictures/download (3).jpg",
+                "/C:/Users/Lenovo/Pictures/download.jpg"
+              ],
+              "disabled": true
+            },
+            {
+              "key": "profilePhoto",
+              "type": "file",
+              "uuid": "de0f100d-551d-421b-90f2-975e3e90c9dc",
+              "src": "/C:/Users/Lenovo/Pictures/download (3).jpg"
+            },
+            {
+              "key": "coverPhoto",
+              "type": "file",
+              "uuid": "d461e6d9-e600-4fa3-96f1-40dad2a6a8ac",
+              "src": "/C:/Users/Lenovo/Pictures/download.jpg",
+              "disabled": true
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}profile/gallery",
+          "host": [
+            "{{BASE_URL}}profile"
+          ],
+          "path": [
+            "gallery"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Profile Gallaray",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"blockedUserId\":2\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}profile/gallery",
+          "host": [
+            "{{BASE_URL}}profile"
+          ],
+          "path": [
+            "gallery"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Chat",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "yashu",
+              "type": "text",
+              "uuid": "9ec3bf33-f06e-473d-ab9f-a93890648832"
+            },
+            {
+              "key": "participants[]",
+              "value": "1",
+              "type": "text",
+              "uuid": "b7cbdf56-a376-4c84-b22f-047e2e4944bd"
+            },
+            {
+              "key": "participants[]",
+              "value": "",
+              "type": "text",
+              "uuid": "1fdc89d4-8b44-4226-86a1-5ad6e1bd6da1",
+              "disabled": true
+            },
+            {
+              "key": "photo",
+              "type": "file",
+              "uuid": "f5ed9907-0df5-4acd-a8db-d55e9b02999d",
+              "src": "/C:/Users/Lenovo/Pictures/download.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats",
+          "host": [
+            "{{BASE_URL}}chats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Chats",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"name\":\"Mahima Group\",\r\n    \"participants\":[\r\n        2\r\n    ]\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats",
+          "host": [
+            "{{BASE_URL}}chats"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Archive Chat",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":6,\r\n    \"participants\":[\r\n        2\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/archive",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "archive"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "unarchive Chat",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":6,\r\n    \"participants\":[\r\n        2\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/unarchive",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "unarchive"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Leave Chat",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":6,\r\n    \"participants\":[\r\n        2\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/leave",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "leave"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Active Inactive Chat",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":5,\r\n    \"active\":false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/active",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "active"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chat Messages",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":5,\r\n    \"message\":\"Hii Kapil\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/messages",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "messages"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Chat Messages",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":5,\r\n    \"message\":\"Hii Kapil\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/messages/5",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "messages",
+            "5"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Chat Message",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"chatId\":5,\r\n    \"message\":\"Hii Kapil\"\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}chats/messages/7",
+          "host": [
+            "{{BASE_URL}}chats"
+          ],
+          "path": [
+            "messages",
+            "7"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload feed Media",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "media",
+              "type": "file",
+              "uuid": "19edde4e-e2f9-4f6d-90cc-81882acb1e9e",
+              "src": [
+                "/C:/Users/Lenovo/Pictures/download (2).jpg",
+                "/C:/Users/Lenovo/Pictures/download (3).jpg",
+                "/C:/Users/Lenovo/Pictures/download.jpg"
+              ]
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/3/upload-media",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "3",
+            "upload-media"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Feeds",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}post_feeds",
+          "host": [
+            "{{BASE_URL}}post_feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create problem",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BASE_URL}}problems",
+          "host": [
+            "{{BASE_URL}}problems"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Problems",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"problem\":\"i have some issues on this projects\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}problems",
+          "host": [
+            "{{BASE_URL}}problems"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Problem",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":3,\r\n    \"problem\":\"i have some issues on this projects\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}problems",
+          "host": [
+            "{{BASE_URL}}problems"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete problem",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}problems",
+          "host": [
+            "{{BASE_URL}}problems"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Report to user",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"userId\":1,\r\n    \"reason\":\"the user is \"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/users",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update reporyt",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"userId\":1,\r\n    \"reason\":\"the user is message\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/users",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete User Report",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"userId\":1,\r\n    \"reason\":\"the user is message\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/users/7",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "users",
+            "7"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Usres Report",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"userId\":1,\r\n    \"reason\":\"the user is message\"\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/users",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Feed Report",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"feedId\":1\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/feeds",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Feed Reports",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/feeds",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "feeds"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete feed Report",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reports/feeds/1",
+          "host": [
+            "{{BASE_URL}}reports"
+          ],
+          "path": [
+            "feeds",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "React  to feed",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"id\":7,\r\n    \"feedId\":3\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BASE_URL}}feeds/react",
+          "host": [
+            "{{BASE_URL}}feeds"
+          ],
+          "path": [
+            "react"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete reaction",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"feedId\":1\r\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}reactions/1",
+          "host": [
+            "{{BASE_URL}}reactions"
+          ],
+          "path": [
+            "1"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
