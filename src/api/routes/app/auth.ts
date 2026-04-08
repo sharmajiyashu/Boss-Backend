@@ -3,7 +3,7 @@ import Container from "typedi";
 import { AuthenticationService } from "../../../services/common/AuthenticationService";
 import { ResponseWrapper } from '../../responseWrapper';
 import { validate } from '../../validators';
-import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema } from '../../validators/auth';
+import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema, forgotPasswordSchema, resetPasswordSchema } from '../../validators/auth';
 
 export default (router: Router) => {
     const authService = Container.get(AuthenticationService);
@@ -54,6 +54,31 @@ export default (router: Router) => {
                 const fullMobile = `${extension}${mobile}`;
                 const result = await authService.userVerifyOTP(fullMobile, otp);
                 return ResponseWrapper.success(res, result, 'OTP verified successfully');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error.message);
+            }
+        });
+
+    // POST /api/app/auth/forgot-password - Request password reset OTP
+    router.post('/auth/forgot-password',
+        validate(forgotPasswordSchema, 'body'),
+        async (req: Request, res: Response) => {
+            try {
+                const { email } = req.body;
+                await authService.userForgotPassword(email);
+                return ResponseWrapper.success(res, null, 'Reset OTP sent to your email');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error.message);
+            }
+        });
+
+    // POST /api/app/auth/reset-password - Reset password using OTP
+    router.post('/auth/reset-password',
+        validate(resetPasswordSchema, 'body'),
+        async (req: Request, res: Response) => {
+            try {
+                await authService.userResetPassword(req.body);
+                return ResponseWrapper.success(res, null, 'Password reset successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error.message);
             }

@@ -176,6 +176,53 @@ export class AuthenticationService {
         return { token, user };
     }
 
+    async userForgotPassword(email: string): Promise<{ otp: string }> {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('User with this email does not exist');
+        }
+
+        const otp = this.generateOTP();
+        const otpExpires = addMinutes(new Date(), CONSTANTS.OTP_EXPIRY_MINUTES);
+
+        user.otp = otp;
+        user.otpExpires = otpExpires;
+        await user.save();
+
+        // Send OTP via email
+        try {
+            await this.emailService.sendAuthOtpEmail({
+                to: email,
+                secret: otp,
+                purpose: 'RESET_PASSWORD'
+            });
+        } catch (error) {
+            AppLogger.error(`Failed to send password reset email to ${email}: ${error}`);
+            // In dev we still return OTP
+        }
+
+        return { otp };
+    }
+
+    async userResetPassword(data: { email: string; otp: string; newPassword: string }): Promise<void> {
+        const user = await User.findOne({
+            email: data.email,
+            otp: data.otp,
+            otpExpires: { $gt: new Date() }
+        });
+
+        if (!user) {
+            throw new Error('Invalid or expired OTP');
+        }
+
+        const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+        user.password = hashedPassword;
+        user.otp = undefined;
+        user.otpExpires = undefined;
+
+        await user.save();
+    }
+
     async verifyToken(token: string): Promise<IUser> {
         try {
             const decoded = jwt.verify(token, config.auth.secret) as { userId: string };

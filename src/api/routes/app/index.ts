@@ -3,6 +3,7 @@ import auth from './auth';
 import home from './home';
 import product from './product';
 import subcategory from './subcategory';
+import user from './user';
 
 
 export default (router: Router): Router => {
@@ -10,5 +11,6 @@ export default (router: Router): Router => {
   home(router);
   product(router);
   subcategory(router);
+  user(router);
   return router;
 };

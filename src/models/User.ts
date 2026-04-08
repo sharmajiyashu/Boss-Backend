@@ -13,6 +13,7 @@ export interface IUser extends Document {
   walletBalance: number;
   referralCode?: string;
   adminRoleId?: mongoose.Types.ObjectId;
+  profileImage?: mongoose.Types.ObjectId;
   location?: {
     lat?: number;
     lng?: number;
@@ -40,6 +41,7 @@ const UserSchema: Schema = new Schema(
     walletBalance: { type: Number, default: 0 },
     referralCode: { type: String, unique: true, sparse: true },
     adminRoleId: { type: Schema.Types.ObjectId, ref: 'AdminRole' },
+    profileImage: { type: Schema.Types.ObjectId, ref: 'Media' },
     location: {
       lat: { type: Number },
       lng: { type: Number },
