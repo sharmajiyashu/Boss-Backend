@@ -181,7 +181,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/products?categoryId=ID&subcategoryId=ID&search=keyword",
+							"raw": "{{baseUrl}}/products?categoryId=ID&subcategoryId=ID&search=keyword&status=approved&page=1&limit=10",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -203,6 +203,19 @@
 									"key": "search",
 									"value": "keyword",
 									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "approved",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
 								}
 							]
 						}
@@ -347,12 +360,38 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/my-products",
+							"raw": "{{baseUrl}}/my-products?status=pending&categoryId=ID&subcategoryId=ID&page=1&limit=10",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"my-products"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "pending",
+									"description": "pending, approved, rejected, sold, inactive",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "ID",
+									"disabled": true
+								},
+								{
+									"key": "subcategoryId",
+									"value": "ID",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
 							]
 						}
 					},

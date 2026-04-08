@@ -43,26 +43,23 @@ export default (app: Express): void => {
 
     app.use('/v1/api', routes());
 
-    app.use((error: CustomError, _req: Request, res: Response, _next: NextFunction) => {
-        if (error instanceof ZodError) {
+    app.use((error: any, _req: Request, res: Response, _next: NextFunction) => {
+        if (error.name === 'ZodError') {
             return res.status(400).json({
                 success: false,
-                error: error.issues.map(err => ({
+                error: (error as ZodError).issues.map(err => ({
                     field: err.path.join('.'),
                     message: err.message
                 }))
             });
         }
-        if (error.status) {
-            return res.status(error.status).json({
-                success: false,
-                error: error.message
-            });
-        }
-        res.status(500).json({
+
+        const status = error.status || 500;
+        const message = error.message || 'Internal server error';
+
+        res.status(status).json({
             success: false,
-            error
-            // error: 'Internal server error'
+            error: message
         });
     });
 };

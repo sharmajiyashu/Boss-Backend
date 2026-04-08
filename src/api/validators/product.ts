@@ -25,10 +25,10 @@ export const updateProductSchema = z.object({
 });
 
 export const getProductQuerySchema = z.object({
-    page: z.string().optional().transform(v => parseInt(v || '1', 10)),
-    limit: z.string().optional().transform(v => parseInt(v || '10', 10)),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
     search: z.string().optional(),
-    category: z.string().optional(),
-    subcategory: z.string().optional(),
+    categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Category ID").optional(),
+    subcategoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Subcategory ID").optional(),
     status: z.enum(['pending', 'approved', 'rejected', 'sold', 'inactive']).optional(),
 });

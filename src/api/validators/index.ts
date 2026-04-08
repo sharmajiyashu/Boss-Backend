@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { ParsedQs } from 'qs';
-import { ParamsDictionary } from 'express-serve-static-core';
 
 type Source = 'body' | 'query' | 'params';
 
@@ -12,8 +10,15 @@ export const validate =
         source === 'body' ? req.body : source === 'query' ? req.query : req.params
       );
       if (!result.success) return next(result.error);
-      if (source === 'body') req.body = result.data;
-      else if (source === 'query') req.query = result.data as unknown as ParsedQs;
-      else req.params = result.data as unknown as ParamsDictionary;
+      if (source === 'body') {
+        req.body = result.data;
+      } else {
+        Object.defineProperty(req, source, {
+          value: result.data,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      }
       next();
     };

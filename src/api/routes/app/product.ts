@@ -7,7 +7,7 @@ import { MediaService } from '../../../services/common/MediaService';
 import { ResponseWrapper } from '../../responseWrapper';
 import { appAuthMiddleware } from '../../middleware/appAuthMiddleware';
 import { validate } from '../../validators';
-import { createProductSchema, updateProductSchema } from '../../validators/product';
+import { createProductSchema, updateProductSchema, getProductQuerySchema } from '../../validators/product';
 import upload from '../../middleware/upload';
 import { MediaType } from '../../../constants/enum';
 
@@ -16,27 +16,33 @@ export default (router: Router) => {
   const cloudinaryService = Container.get(CloudinaryService);
   const mediaService = Container.get(MediaService);
 
-  // GET /api/products - Get all approved products with filters
-  router.get('/products', async (req: Request, res: Response) => {
-    try {
-      const { categoryId, subcategoryId, search } = req.query as any;
-      const products = await productService.getProducts({ categoryId, subcategoryId, search });
-      return ResponseWrapper.success(res, products, 'Products fetched successfully');
-    } catch (error: any) {
-      return ResponseWrapper.error(res, error.message);
-    }
-  });
+  // GET /api/products - Get all approved products with filters and pagination
+  router.get('/products',
+    validate(getProductQuerySchema, 'query'),
+    async (req: Request, res: Response) => {
+      try {
+        const filters = req.query as any;
+        const result = await productService.getProducts(filters);
+        return ResponseWrapper.success(res, result, 'Products fetched successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
 
-  // GET /api/my-products - Get products listed by current user
-  router.get('/my-products', appAuthMiddleware, async (req: Request, res: Response) => {
-    try {
-      const userId = (req as any).user.id;
-      const products = await productService.listSellerProducts(userId);
-      return ResponseWrapper.success(res, products, 'Your products fetched successfully');
-    } catch (error: any) {
-      return ResponseWrapper.error(res, error.message);
-    }
-  });
+  // GET /api/my-products - Get products listed by current user with filters and pagination
+  router.get('/my-products',
+    appAuthMiddleware,
+    validate(getProductQuerySchema, 'query'),
+    async (req: Request, res: Response) => {
+      try {
+        const userId = (req as any).user.id;
+        const filters = req.query as any;
+        const result = await productService.listSellerProducts(userId, filters);
+        return ResponseWrapper.success(res, result, 'Your products fetched successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
 
   // GET /api/products/:id - Get product details
   router.get('/products/:id', async (req: Request, res: Response) => {

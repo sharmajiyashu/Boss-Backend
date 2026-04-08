@@ -2,9 +2,31 @@ import { Service } from 'typedi';
 import Product from '../../models/Product';
 import Subcategory from '../../models/Subcategory';
 
+
+export interface IProductFilters {
+  categoryId?: string;
+  subcategoryId?: string;
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface IPaginatedProducts {
+  products: any[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 @Service()
 export class ProductService {
-  public async getProducts(filters: { categoryId?: string; subcategoryId?: string; search?: string }) {
+  public async getProducts(filters: IProductFilters): Promise<IPaginatedProducts> {
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
     const query: any = { status: 'approved' }; // Only show approved products to general users
 
     if (filters.categoryId) {
@@ -19,19 +41,31 @@ export class ProductService {
       query.name = { $regex: filters.search, $options: 'i' };
     }
 
-    const products = await Product.find(query)
-      .populate({
-        path: 'category',
-        populate: { path: 'media' }
-      })
-      .populate({
-        path: 'subcategory',
-        populate: { path: 'media' }
-      })
-      .populate('seller', 'firstName lastName email')
-      .populate('media');
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .populate({
+          path: 'category',
+          populate: { path: 'media' }
+        })
+        .populate({
+          path: 'subcategory',
+          populate: { path: 'media' }
+        })
+        .populate('seller', 'firstName lastName email')
+        .populate('media')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Product.countDocuments(query)
+    ]);
 
-    return products;
+    return {
+      products,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   public async getProductById(id: string) {
@@ -88,18 +122,53 @@ export class ProductService {
     return product;
   }
 
-  public async listSellerProducts(userId: string) {
-    return Product.find({ seller: userId })
-      .populate({
-        path: 'category',
-        populate: { path: 'media' }
-      })
-      .populate({
-        path: 'subcategory',
-        populate: { path: 'media' }
-      })
-      .populate('media')
-      .sort({ createdAt: -1 });
+  public async listSellerProducts(userId: string, filters: IProductFilters): Promise<IPaginatedProducts> {
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const query: any = { seller: userId };
+
+    if (filters.status) {
+      query.status = filters.status;
+    }
+
+    if (filters.categoryId) {
+      query.category = filters.categoryId;
+    }
+
+    if (filters.subcategoryId) {
+      query.subcategory = filters.subcategoryId;
+    }
+
+    if (filters.search) {
+      query.name = { $regex: filters.search, $options: 'i' };
+    }
+
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .populate({
+          path: 'category',
+          populate: { path: 'media' }
+        })
+        .populate({
+          path: 'subcategory',
+          populate: { path: 'media' }
+        })
+        .populate('media')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Product.countDocuments(query)
+    ]);
+
+    return {
+      products,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
   public async updateProductStatus(productId: string, status: 'pending' | 'approved' | 'rejected' | 'sold' | 'inactive') {
