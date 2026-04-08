@@ -137,6 +137,45 @@
 			"name": "Products",
 			"item": [
 				{
+					"name": "Upload Product Images",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "media",
+									"description": "Select multiple image files",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get All Products",
 					"request": {
 						"method": "GET",
@@ -205,7 +244,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"iPhone 15 Pro\",\n    \"description\": \"Used 1 week, perfect condition\",\n    \"category\": \"65f...\",\n    \"subcategory\": \"65f...\",\n    \"media\": [\"65f...\"],\n    \"price\": 85000,\n    \"stock\": 1,\n    \"customFields\": {\n        \"brand\": \"Apple\",\n        \"color\": \"Titanium\"\n    }\n}",
+							"raw": "{\n    \"name\": \"iPhone 15 Pro\",\n    \"description\": \"Used 1 week, perfect condition\",\n    \"category\": \"65f...\",\n    \"subcategory\": \"65f...\",\n    \"price\": 85000,\n    \"media\": [\"65f...\"],\n    \"customFields\": {\n        \"brand\": \"Apple\",\n        \"color\": \"Titanium\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -219,6 +258,74 @@
 							],
 							"path": [
 								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Images to Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mediaIds\": [\"65f...\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/PRODUCT_ID/images",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"PRODUCT_ID",
+								"images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/PRODUCT_ID/images/MEDIA_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"PRODUCT_ID",
+								"images",
+								"MEDIA_ID"
 							]
 						}
 					},

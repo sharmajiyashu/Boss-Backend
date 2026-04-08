@@ -3,7 +3,7 @@ export const appWhitelistRoutes = [
     '/auth/verify-otp',
     '/auth/register',
     '/auth/login',
-    '/products',
     '/subcategories',
+    '/home',
     '/categories',
 ]
