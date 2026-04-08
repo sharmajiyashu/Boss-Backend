@@ -5,6 +5,7 @@ import category from './category';
 import subcategory from './subcategory';
 import user from './user';
 import product from './product';
+import setting from './setting';
 
 
 export default (router: Router): Router => {
@@ -13,5 +14,6 @@ export default (router: Router): Router => {
     subcategory(router);
     user(router);
     product(router);
+    setting(router);
     return router;
 };

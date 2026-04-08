@@ -10,6 +10,74 @@
 			"name": "Admin",
 			"item": [
 				{
+					"name": "App Settings",
+					"item": [
+						{
+							"name": "Get Settings",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{adminBaseUrl}}/settings",
+									"host": [
+										"{{adminBaseUrl}}"
+									],
+									"path": [
+										"settings"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Settings",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{adminToken}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"platformFees\": 50,\n    \"reportReasons\": [\n        \"Fraud\",\n        \"Abuse\",\n        \"Spam\",\n        \"Fake product\",\n        \"Inappropriate Content\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{adminBaseUrl}}/settings",
+									"host": [
+										"{{adminBaseUrl}}"
+									],
+									"path": [
+										"settings"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Product Management",
 					"item": [
 						{
@@ -190,60 +258,6 @@
 							"response": []
 						},
 						{
-							"name": "Send OTP (Mobile)",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"extension\": \"+91\",\n    \"mobile\": \"9876543210\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/auth/send-otp",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"auth",
-										"send-otp"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Verify OTP (Mobile)",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"extension\": \"+91\",\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{baseUrl}}/auth/verify-otp",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"auth",
-										"verify-otp"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "Forgot Password",
 							"request": {
 								"method": "POST",
@@ -277,7 +291,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"123456\",\n    \"newPassword\": \"newsecurepassword123\"\n}",
+									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"123456\",\n    \"newPassword\": \"newpassword123\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -292,6 +306,219 @@
 									"path": [
 										"auth",
 										"reset-password"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "User Actions",
+					"item": [
+						{
+							"name": "Report User/Product",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"targetUserId\": \"65f8a0b0c1d2e3f4a5b6c7dd\",\n    \"reason\": \"Spam\",\n    \"description\": \"Excessive promotional messages\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user-actions/report",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-actions",
+										"report"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Block User",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"targetUserId\": \"65f8a0b0c1d2e3f4a5b6c7dd\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user-actions/block",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-actions",
+										"block"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Unblock User",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"targetUserId\": \"65f8a0b0c1d2e3f4a5b6c7dd\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user-actions/unblock",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-actions",
+										"unblock"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Subscriptions",
+					"item": [
+						{
+							"name": "Get Subscription Plans",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/subscriptions/plans",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subscriptions",
+										"plans"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Purchase Subscription (Create Order)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"planId\": \"65f8a0b0c1d2e3f4a5b6c7de\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subscriptions/purchase",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subscriptions",
+										"purchase"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Payment & Activate",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"planId\": \"65f8a0b0c1d2e3f4a5b6c7de\",\n    \"razorpayPaymentId\": \"pay_OK123456789\",\n    \"razorpayOrderId\": \"order_OK123456789\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/subscriptions/verify",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"subscriptions",
+										"verify"
 									]
 								}
 							},
@@ -436,47 +663,6 @@
 											"key": "search",
 											"value": "keyword",
 											"disabled": true
-										},
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "limit",
-											"value": "10"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "My Products",
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{baseUrl}}/my-products?status=pending&page=1&limit=10",
-									"host": [
-										"{{baseUrl}}"
-									],
-									"path": [
-										"my-products"
-									],
-									"query": [
-										{
-											"key": "status",
-											"value": "pending"
 										},
 										{
 											"key": "page",

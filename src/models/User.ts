@@ -14,6 +14,8 @@ export interface IUser extends Document {
   referralCode?: string;
   adminRoleId?: mongoose.Types.ObjectId;
   profileImage?: mongoose.Types.ObjectId;
+  blockedUsers: mongoose.Types.ObjectId[];
+  isBlocked: boolean;
   location?: {
     lat?: number;
     lng?: number;
@@ -42,6 +44,8 @@ const UserSchema: Schema = new Schema(
     referralCode: { type: String, unique: true, sparse: true },
     adminRoleId: { type: Schema.Types.ObjectId, ref: 'AdminRole' },
     profileImage: { type: Schema.Types.ObjectId, ref: 'Media' },
+    blockedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    isBlocked: { type: Boolean, default: false },
     location: {
       lat: { type: Number },
       lng: { type: Number },
