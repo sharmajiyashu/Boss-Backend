@@ -13,8 +13,9 @@ export class CategoryService {
     public async createCategory(data: Partial<ICategory>): Promise<ICategory> {
         try {
             const category = await Category.create(data);
-            AppLogger.info(`✌️ Category ${category.name} created successfully.`);
-            return category;
+            const populatedCategory = await category.populate('media');
+            AppLogger.info(`✌️ Category ${populatedCategory.name} created successfully.`);
+            return populatedCategory;
         } catch (error) {
             AppLogger.error('❌ Error creating category:', error);
             throw error;
@@ -68,7 +69,7 @@ export class CategoryService {
      */
     public async updateCategory(id: string, data: Partial<ICategory>): Promise<ICategory | null> {
         try {
-            const updatedCategory = await Category.findByIdAndUpdate(id, data, { new: true });
+            const updatedCategory = await Category.findByIdAndUpdate(id, data, { new: true }).populate('media');
             if (!updatedCategory) {
                 AppLogger.warn(`⚠️ Category ${id} not found for update.`);
                 return null;

@@ -13,8 +13,9 @@ export class SubcategoryService {
     public async createSubcategory(data: Partial<ISubcategory>): Promise<ISubcategory> {
         try {
             const subcategory = await Subcategory.create(data);
-            AppLogger.info(`✌️ Subcategory ${subcategory.name} created successfully.`);
-            return subcategory;
+            const populatedSubcategory = await subcategory.populate(['media', { path: 'category', populate: 'media' }]);
+            AppLogger.info(`✌️ Subcategory ${populatedSubcategory.name} created successfully.`);
+            return populatedSubcategory;
         } catch (error) {
             AppLogger.error('❌ Error creating subcategory:', error);
             throw error;
@@ -40,7 +41,11 @@ export class SubcategoryService {
             const [data, total] = await Promise.all([
                 Subcategory.find(query)
                     .populate('media')
-                    .populate('category', 'name') // Populate Category name
+                    .populate({
+                        path: 'category',
+                        select: 'name media',
+                        populate: { path: 'media' }
+                    }) // Populate Category name and media
                     .sort({ createdAt: -1 })
                     .skip(skip)
                     .limit(limit)
@@ -70,7 +75,8 @@ export class SubcategoryService {
      */
     public async updateSubcategory(id: string, data: Partial<ISubcategory>): Promise<ISubcategory | null> {
         try {
-            const updatedSubcategory = await Subcategory.findByIdAndUpdate(id, data, { new: true });
+            const updatedSubcategory = await Subcategory.findByIdAndUpdate(id, data, { new: true })
+                .populate(['media', { path: 'category', populate: 'media' }]);
             if (!updatedSubcategory) {
                 AppLogger.warn(`⚠️ Subcategory ${id} not found for update.`);
                 return null;
@@ -105,6 +111,10 @@ export class SubcategoryService {
      * Get a single subcategory by ID.
      */
     public async getSubcategoryById(id: string): Promise<ISubcategory | null> {
-        return Subcategory.findById(id).populate('media').populate('category', 'name');
+        return Subcategory.findById(id).populate('media').populate({
+            path: 'category',
+            select: 'name media',
+            populate: { path: 'media' }
+        });
     }
 }

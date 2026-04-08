@@ -1,8 +1,8 @@
 import { Response } from "express";
 
 export class ResponseWrapper {
-  static success<T>(res: Response, data: T, message: string = 'Success') {
-    return res.status(200).json({
+  static success<T>(res: Response, data: T, message: string = 'Success', code: number = 200) {
+    return res.status(code).json({
       success: true,
       data,
       message,

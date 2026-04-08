@@ -10,7 +10,7 @@ export interface IProduct extends Document {
   price: number;
   stock?: number;
   customFields?: Record<string, any>; // Stores key-value pairs (e.g., { "brand": "Apple" })
-  status: 'active' | 'inactive';
+  status: 'pending' | 'approved' | 'rejected' | 'sold' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,7 +26,7 @@ const ProductSchema: Schema = new Schema(
     price: { type: Number, required: true, default: 0 },
     stock: { type: Number, default: 0 },
     customFields: { type: Schema.Types.Mixed }, // Dynamic object for easy filtering
-    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected', 'sold', 'inactive'], default: 'pending' },
   },
   {
     timestamps: true,
