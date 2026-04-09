@@ -5,6 +5,7 @@ export const appWhitelistRoutes = [
     '/auth/login',
     '/auth/forgot-password',
     '/auth/reset-password',
+    '/auth/verify-email',
     '/subcategories',
     '/home',
     '/categories',

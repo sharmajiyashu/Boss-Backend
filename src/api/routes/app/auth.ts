@@ -3,7 +3,7 @@ import Container from "typedi";
 import { AuthenticationService } from "../../../services/common/AuthenticationService";
 import { ResponseWrapper } from '../../responseWrapper';
 import { validate } from '../../validators';
-import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema, forgotPasswordSchema, resetPasswordSchema } from '../../validators/auth';
+import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema } from '../../validators/auth';
 
 export default (router: Router) => {
     const authService = Container.get(AuthenticationService);
@@ -14,7 +14,20 @@ export default (router: Router) => {
         async (req: Request, res: Response) => {
             try {
                 const result = await authService.userRegister(req.body);
-                return ResponseWrapper.success(res, result, 'User registered successfully');
+                return ResponseWrapper.success(res, result, 'User registered. Please verify your email.');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error);
+            }
+        });
+
+    // POST /api/app/auth/verify-email - Verify email using OTP
+    router.post('/auth/verify-email',
+        validate(verifyEmailSchema, 'body'),
+        async (req: Request, res: Response) => {
+            try {
+                const { email, otp } = req.body;
+                const result = await authService.userVerifyEmail(email, otp);
+                return ResponseWrapper.success(res, result, 'Email verified successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error);
             }

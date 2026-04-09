@@ -93,14 +93,29 @@ export class AuthenticationService {
             password: hashedPassword,
             userRole: 'user',
             referralCode: this.generateReferralCode(),
+            isEmailVerified: false, // Must verify email
         });
 
-        // Populate profile image after creation if needed (though usually empty on register)
+        // Send OTP via email
+        const otp = this.generateOTP();
+        const otpExpires = addMinutes(new Date(), CONSTANTS.OTP_EXPIRY_MINUTES);
+        user.otp = otp;
+        user.otpExpires = otpExpires;
+        await user.save();
+
+        try {
+            await this.emailService.sendAuthOtpEmail({
+                to: data.email,
+                secret: otp,
+                purpose: 'EMAIL_VERIFICATION'
+            });
+        } catch (error) {
+            AppLogger.error(`Failed to send verification email to ${data.email}: ${error}`);
+        }
+
         await user.populate('profileImage');
 
-        const token = this.generateToken(user._id.toString(), user.userRole);
-
-        return { token, user };
+        return { token: '', user }; // Return empty token, must verify first
     }
 
     async userLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
@@ -113,6 +128,10 @@ export class AuthenticationService {
             throw new Error('Invalid email or password');
         }
 
+        if (!user.isEmailVerified) {
+            throw new Error('Please verify your email before logging in');
+        }
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             throw new Error('Invalid email or password');
@@ -123,6 +142,28 @@ export class AuthenticationService {
         // Update last login
         user.lastLoginAt = new Date();
         await user.save();
+
+        return { token, user };
+    }
+
+    async userVerifyEmail(email: string, otp: string): Promise<{ token: string; user: IUser }> {
+        const user = await User.findOne({ 
+            email, 
+            otp, 
+            otpExpires: { $gt: new Date() } 
+        }).populate('profileImage');
+
+        if (!user) {
+            throw new Error('Invalid or expired OTP');
+        }
+
+        user.isEmailVerified = true;
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        user.lastLoginAt = new Date();
+        await user.save();
+
+        const token = this.generateToken(user._id.toString(), user.userRole);
 
         return { token, user };
     }

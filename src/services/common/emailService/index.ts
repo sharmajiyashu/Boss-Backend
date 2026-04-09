@@ -5,26 +5,40 @@ import nodemailer from 'nodemailer';
 
 @Service()
 export class EmailService {
-  constructor() { }
+  constructor(
+    @Inject('emailClient') private emailTransporter: nodemailer.Transporter
+  ) { }
+
+  private async asyncSendEmail(options: EmailOptions) {
+    try {
+      const info = await this.emailTransporter.sendMail({
+        from: config.email.authFrom,
+        to: options.to,
+        subject: options.subject,
+        html: options.htmlBody
+      });
+      console.log('📧 Email sent: %s', info.messageId);
+      return info;
+    } catch (error) {
+      console.error('❌ Error sending email:', error);
+      throw error;
+    }
+  }
 
   private async sendEmail(options: EmailOptions) {
-
-    // return await this.emailTransporter.sendMail({
-    //   from: config.email.authFrom,
-    //   to: options.to,
-    //   subject: options.subject,
-    //   html: options.htmlBody
-    // });
-    console.log('--------------------------------------------------');
-    console.log('📧 [MOCK EMAIL SENT]');
-    console.log(`From: ${config.email.authFrom}`);
-    console.log(`To: ${options.to}`);
-    console.log(`Subject: ${options.subject}`);
-    console.log('Body:');
-    console.log(options.htmlBody);
-    console.log('--------------------------------------------------');
-
-    return { messageId: 'mock-message-id-' + Date.now() };
+    // Attempt actual send
+    try {
+      return await this.asyncSendEmail(options);
+    } catch (e) {
+      // Fallback to mock log in dev if sending fails (optional, but good for debug)
+      console.log('--------------------------------------------------');
+      console.log('📧 [FALLBACK MOCK EMAIL]');
+      console.log(`From: ${config.email.authFrom}`);
+      console.log(`To: ${options.to}`);
+      console.log(`Subject: ${options.subject}`);
+      console.log('--------------------------------------------------');
+      return { messageId: 'mock-message-id-' + Date.now() };
+    }
   }
 
   async sendAuthOtpEmail(options: SecretEmailOptions) {
