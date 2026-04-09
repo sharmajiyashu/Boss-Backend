@@ -121,14 +121,31 @@ export class ProductService {
       }
     }
 
-    const product = new Product({
-      ...data,
-      seller: userId,
-      status: 'pending' // Always start as pending when created by user
-    });
+    if (data.id) {
+      // Update existing product
+      const product = await Product.findOne({ _id: data.id, seller: userId });
+      if (!product) {
+        throw new Error('Product not found or unauthorized');
+      }
 
-    await product.save();
-    return product;
+      Object.assign(product, {
+        ...data,
+        status: 'pending' // Reset to pending on update
+      });
+
+      await product.save();
+      return product;
+    } else {
+      // Create new product
+      const product = new Product({
+        ...data,
+        seller: userId,
+        status: 'pending' // Always start as pending when created by user
+      });
+
+      await product.save();
+      return product;
+    }
   }
 
   public async listSellerProducts(userId: string, filters: IProductFilters): Promise<IPaginatedProducts> {

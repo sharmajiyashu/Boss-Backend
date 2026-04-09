@@ -8,7 +8,6 @@ export interface IProduct extends Document {
   subcategory?: mongoose.Types.ObjectId;
   media: mongoose.Types.ObjectId[];
   price: number;
-  stock?: number;
   customFields?: Record<string, any>; // Stores key-value pairs (e.g., { "brand": "Apple" })
   status: 'pending' | 'approved' | 'rejected' | 'sold' | 'inactive';
   createdAt: Date;
@@ -24,7 +23,6 @@ const ProductSchema: Schema = new Schema(
     subcategory: { type: Schema.Types.ObjectId, ref: 'Subcategory' },
     media: [{ type: Schema.Types.ObjectId, ref: 'Media' }],
     price: { type: Number, required: true, default: 0 },
-    stock: { type: Number, default: 0 },
     customFields: { type: Schema.Types.Mixed }, // Dynamic object for easy filtering
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'sold', 'inactive'], default: 'pending' },
   },

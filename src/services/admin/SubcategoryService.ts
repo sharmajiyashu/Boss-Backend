@@ -25,7 +25,6 @@ export class SubcategoryService {
                 $match: {
                     status: 'approved',
                     subcategory: { $in: ids },
-                    $expr: { $gt: [{ $ifNull: ['$stock', 0] }, 0] },
                 },
             },
             { $group: { _id: '$subcategory', productCount: { $sum: 1 } } },

@@ -43,7 +43,7 @@ export class AuthenticationService {
         const user = await User.findOne({
             email,
             userRole: 'admin'
-        });
+        }).populate('profileImage');
 
         if (!user || !user.password) {
             throw new Error('Invalid email or password');
@@ -95,6 +95,9 @@ export class AuthenticationService {
             referralCode: this.generateReferralCode(),
         });
 
+        // Populate profile image after creation if needed (though usually empty on register)
+        await user.populate('profileImage');
+
         const token = this.generateToken(user._id.toString(), user.userRole);
 
         return { token, user };
@@ -104,7 +107,7 @@ export class AuthenticationService {
         const user = await User.findOne({
             email,
             userRole: 'user'
-        });
+        }).populate('profileImage');
 
         if (!user || !user.password) {
             throw new Error('Invalid email or password');
@@ -159,7 +162,7 @@ export class AuthenticationService {
             mobile,
             otp,
             otpExpires: { $gt: new Date() }
-        });
+        }).populate('profileImage');
 
         if (!user) {
             throw new Error('Invalid or expired OTP');
