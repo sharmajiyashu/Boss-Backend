@@ -9,6 +9,7 @@ import subscription from './subscription';
 import chat from './chat';
 import verification from './verification';
 import setting from './setting';
+import payment from './payment';
 
 
 export default (router: Router): Router => {
@@ -22,5 +23,6 @@ export default (router: Router): Router => {
   chat(router);
   verification(router);
   setting(router);
+  payment(router);
   return router;
 };

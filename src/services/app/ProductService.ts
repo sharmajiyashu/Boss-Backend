@@ -86,10 +86,10 @@ export class ProductService {
   }
 
   public async createProduct(userId: string, data: any) {
-    // Check if user is verified or premium
+    // Check if user is verified, premium, or has paid platform fee
     const user = await User.findById(userId);
-    if (!user?.isVerified && !user?.isPremium) {
-      throw new Error('Please verify your Aadhaar or purchase a subscription to list products.');
+    if (!user?.isVerified && !user?.isPremium && !user?.isPlatformPaid) {
+      throw new Error('Please verify your Aadhaar, purchase a subscription, or pay the platform fee to list products.');
     }
 
     // 1. Validate custom fields if subcategory is provided

@@ -6,6 +6,7 @@ import config from '../../config';
 import { addDays, addMonths } from 'date-fns';
 import AppSetting from '../../models/AppSetting';
 import User from '../../models/User';
+import Payment from '../../models/Payment';
 
 @Service()
 export class SubscriptionService {
@@ -71,5 +72,41 @@ export class SubscriptionService {
     await User.findByIdAndUpdate(userId, { isPremium: true });
 
     return subscription;
+  }
+
+  public async createPlatformFeeOrder(userId: string) {
+    const settings = await AppSetting.findOne();
+    if (!settings || !settings.platformFees) throw new Error('Platform fees not configured');
+
+    const order = await this.razorpay.orders.create({
+      amount: settings.platformFees * 100, // in paise
+      currency: 'INR',
+      receipt: `plat_${userId}_${Date.now()}`,
+    });
+
+    await Payment.create({
+      user: userId,
+      amount: settings.platformFees,
+      razorpayOrderId: order.id,
+      paymentType: 'platform_fee',
+      status: 'pending'
+    });
+
+    return order;
+  }
+
+  public async verifyPlatformFeePayment(userId: string, data: { razorpayPaymentId: string; razorpayOrderId: string }) {
+    const payment = await Payment.findOne({ razorpayOrderId: data.razorpayOrderId });
+    if (!payment) throw new Error('Payment record not found');
+
+    // Update payment record
+    payment.razorpayPaymentId = data.razorpayPaymentId;
+    payment.status = 'captured';
+    await payment.save();
+
+    // Update user status
+    await User.findByIdAndUpdate(userId, { isPlatformPaid: true });
+
+    return { success: true, message: 'Platform fee paid successfully' };
   }
 }

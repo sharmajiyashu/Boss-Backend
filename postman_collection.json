@@ -682,6 +682,77 @@
 					]
 				},
 				{
+					"name": "Payments",
+					"item": [
+						{
+							"name": "Create Platform Fee Order",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payments/platform-fee",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payments",
+										"platform-fee"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Platform Fee Payment",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"razorpayPaymentId\": \"pay_OK123456789\",\n    \"razorpayOrderId\": \"order_OK123456789\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/payments/platform-fee/verify",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payments",
+										"platform-fee",
+										"verify"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "App Settings",
 					"item": [
 						{

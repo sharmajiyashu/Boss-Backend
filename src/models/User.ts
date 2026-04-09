@@ -34,6 +34,7 @@ export interface IUser extends Document {
   };
   isVerified: boolean;
   isPremium: boolean;
+  isPlatformPaid: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -79,6 +80,7 @@ const UserSchema: Schema = new Schema(
     },
     isVerified: { type: Boolean, default: false },
     isPremium: { type: Boolean, default: false },
+    isPlatformPaid: { type: Boolean, default: false },
   },
   {
     timestamps: true,
