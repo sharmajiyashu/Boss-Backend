@@ -33,7 +33,8 @@ export default (router: Router) => {
       const categoryId = req.params.categoryId as string;
       const result = await subcategoryService.getSubcategories(
         { page: 1, limit: 100 },
-        { category: categoryId, status: 'active' }
+        { category: categoryId, status: 'active' },
+        { includeProductCount: true }
       );
       return ResponseWrapper.success(res, result.data, 'Subcategories fetched successfully');
     } catch (error: any) {

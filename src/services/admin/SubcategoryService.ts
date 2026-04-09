@@ -1,11 +1,41 @@
 import { Service } from 'typedi';
+import mongoose from 'mongoose';
 import Subcategory, { ISubcategory } from '../../models/Subcategory';
+import Product from '../../models/Product';
 import { IPagination, IPaginatedResponse } from '../../interfaces';
 import AppLogger from '../../api/loaders/logger';
 
 @Service()
 export class SubcategoryService {
     constructor() { }
+
+    /**
+     * For each item with `_id`, set `productCount` = available products in that subcategory
+     * (status approved and stock greater than zero).
+     */
+    public async attachAvailableProductCounts<T extends { _id: mongoose.Types.ObjectId | string }>(
+        items: T[]
+    ): Promise<Array<T & { productCount: number }>> {
+        if (!items.length) {
+            return items.map((item) => ({ ...item, productCount: 0 }));
+        }
+        const ids = items.map((i) => new mongoose.Types.ObjectId(String(i._id)));
+        const counts = await Product.aggregate<{ _id: mongoose.Types.ObjectId; productCount: number }>([
+            {
+                $match: {
+                    status: 'approved',
+                    subcategory: { $in: ids },
+                    $expr: { $gt: [{ $ifNull: ['$stock', 0] }, 0] },
+                },
+            },
+            { $group: { _id: '$subcategory', productCount: { $sum: 1 } } },
+        ]);
+        const map = new Map(counts.map((c) => [c._id.toString(), c.productCount]));
+        return items.map((item) => ({
+            ...item,
+            productCount: map.get(String(item._id)) ?? 0,
+        }));
+    }
 
     /**
      * Create a subcategory.
@@ -27,8 +57,9 @@ export class SubcategoryService {
      */
     public async getSubcategories(
         pagination: IPagination,
-        filters: { status?: string; search?: string; category?: string } = {}
-    ): Promise<IPaginatedResponse<ISubcategory>> {
+        filters: { status?: string; search?: string; category?: string } = {},
+        options: { includeProductCount?: boolean } = {}
+    ): Promise<IPaginatedResponse<ISubcategory | (ISubcategory & { productCount: number })>> {
         try {
             const { page, limit } = pagination;
             const skip = (page - 1) * limit;
@@ -38,7 +69,7 @@ export class SubcategoryService {
             if (filters.category) query.category = filters.category;
             if (filters.search) query.name = { $regex: filters.search, $options: 'i' };
 
-            const [data, total] = await Promise.all([
+            const [rawData, total] = await Promise.all([
                 Subcategory.find(query)
                     .populate('media')
                     .populate({
@@ -52,6 +83,10 @@ export class SubcategoryService {
                     .exec(),
                 Subcategory.countDocuments(query)
             ]);
+
+            const data = options.includeProductCount
+                ? (await this.attachAvailableProductCounts(rawData.map((doc) => doc.toObject()))) as unknown as (ISubcategory & { productCount: number })[]
+                : rawData;
 
             const totalPages = Math.ceil(total / limit);
 
