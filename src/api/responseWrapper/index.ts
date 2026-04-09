@@ -9,8 +9,17 @@ export class ResponseWrapper {
     });
   }
 
-  static error(res: Response, error: string | Error, code: number = 400) {
-    const errorMessage = typeof error === 'string' ? error : error.message;
+  static error(res: Response, error: any, code: number = 400) {
+    let errorMessage = 'An error occurred';
+
+    if (typeof error === 'string') {
+      errorMessage = error;
+    } else if (error && error.message) {
+      errorMessage = error.message;
+    } else if (error && typeof error === 'object') {
+      errorMessage = JSON.stringify(error);
+    }
+
     return res.status(code).json({
       success: false,
       error: errorMessage,

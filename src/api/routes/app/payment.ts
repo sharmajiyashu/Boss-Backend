@@ -21,7 +21,7 @@ export default (router: Router) => {
         const result = await subscriptionService.createPlatformFeeOrder(userId);
         return ResponseWrapper.success(res, result, 'Platform fee order created');
       } catch (error: any) {
-        return ResponseWrapper.error(res, error.message);
+        return ResponseWrapper.error(res, error);
       }
     }
   );
@@ -40,7 +40,7 @@ export default (router: Router) => {
         const result = await subscriptionService.verifyPlatformFeePayment(userId, req.body);
         return ResponseWrapper.success(res, result, 'Platform fee payment verified');
       } catch (error: any) {
-        return ResponseWrapper.error(res, error.message);
+        return ResponseWrapper.error(res, error);
       }
     }
   );

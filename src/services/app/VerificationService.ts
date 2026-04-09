@@ -28,9 +28,13 @@ export class VerificationService {
           },
         }
       );
+      const apiResponse = response.data;
 
-      // The response usually contains a reference_id in data.data or similar
-      const referenceId = response.data?.data?.reference_id || response.data?.reference_id;
+      if (apiResponse.status === false) {
+        throw new Error(apiResponse.message || 'Failed to send OTP');
+      }
+
+      const referenceId = apiResponse.data?.reference_id || apiResponse.reference_id;
 
       if (referenceId) {
         // Store reference_id and aadhaar in user model
@@ -41,10 +45,13 @@ export class VerificationService {
         });
       }
 
-      return response.data;
+      return apiResponse;
     } catch (error: any) {
-      console.error('DigiVerification sendOtp error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to send OTP');
+      if (error.response?.data) {
+        const apiError = error.response.data;
+        throw new Error(apiError.message || 'Failed to send OTP');
+      }
+      throw error;
     }
   }
 
@@ -70,9 +77,13 @@ export class VerificationService {
           },
         }
       );
+      const apiResponse = response.data;
 
       // Check if success
-      if (response.data.status === 'success' || response.data.success || response.data.message === 'OTP Verified Successfully') {
+      // Based on typical DigiVerification API, status could be boolean or string
+      const isSuccess = apiResponse.status === true || apiResponse.status === 'success' || apiResponse.success === true;
+
+      if (isSuccess) {
         await User.findByIdAndUpdate(userId, {
           'aadhaarVerification.status': 'verified',
           'aadhaarVerification.verifiedAt': new Date(),
@@ -82,12 +93,15 @@ export class VerificationService {
         await User.findByIdAndUpdate(userId, {
           'aadhaarVerification.status': 'failed',
         });
+        throw new Error(apiResponse.message || 'OTP verification failed');
       }
 
-      return response.data;
+      return apiResponse;
     } catch (error: any) {
-      console.error('DigiVerification verifyOtp error:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to verify OTP');
+      if (error.response?.data) {
+        throw new Error(error.response.data.message || 'Failed to verify OTP');
+      }
+      throw error;
     }
   }
 }

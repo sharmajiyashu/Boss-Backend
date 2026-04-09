@@ -12,7 +12,7 @@ export default (router: Router) => {
       const plans = await subscriptionService.getActivePlans();
       return ResponseWrapper.success(res, plans, 'Plans fetched successfully');
     } catch (error: any) {
-      return ResponseWrapper.error(res, error.message);
+      return ResponseWrapper.error(res, error);
     }
   });
 
@@ -25,7 +25,7 @@ export default (router: Router) => {
         const order = await subscriptionService.createOrder(planId, userId);
         return ResponseWrapper.success(res, order, 'Order created successfully');
       } catch (error: any) {
-        return ResponseWrapper.error(res, error.message);
+        return ResponseWrapper.error(res, error);
       }
     });
 
@@ -37,7 +37,7 @@ export default (router: Router) => {
         const subscription = await subscriptionService.verifyAndActivateSubscription(userId, req.body);
         return ResponseWrapper.success(res, subscription, 'Subscription activated successfully');
       } catch (error: any) {
-        return ResponseWrapper.error(res, error.message);
+        return ResponseWrapper.error(res, error);
       }
     });
 };

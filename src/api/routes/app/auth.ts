@@ -16,7 +16,7 @@ export default (router: Router) => {
                 const result = await authService.userRegister(req.body);
                 return ResponseWrapper.success(res, result, 'User registered successfully');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 
@@ -29,7 +29,7 @@ export default (router: Router) => {
                 const result = await authService.userLogin(email, password);
                 return ResponseWrapper.success(res, result, 'User logged in successfully');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 
@@ -42,7 +42,7 @@ export default (router: Router) => {
                 await authService.userSendOTP(fullMobile);
                 return ResponseWrapper.success(res, null, 'OTP sent successfully');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 
@@ -55,7 +55,7 @@ export default (router: Router) => {
                 const result = await authService.userVerifyOTP(fullMobile, otp);
                 return ResponseWrapper.success(res, result, 'OTP verified successfully');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 
@@ -68,7 +68,7 @@ export default (router: Router) => {
                 await authService.userForgotPassword(email);
                 return ResponseWrapper.success(res, null, 'Reset OTP sent to your email');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 
@@ -80,7 +80,7 @@ export default (router: Router) => {
                 await authService.userResetPassword(req.body);
                 return ResponseWrapper.success(res, null, 'Password reset successfully');
             } catch (error: any) {
-                return ResponseWrapper.error(res, error.message);
+                return ResponseWrapper.error(res, error);
             }
         });
 }

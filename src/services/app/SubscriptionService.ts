@@ -32,7 +32,7 @@ export class SubscriptionService {
 
     // Check if it's the user's first subscription
     const subscriptionCount = await UserSubscription.countDocuments({ user: userId });
-    
+
     let totalAmount = plan.price;
     if (subscriptionCount === 0) {
       totalAmount += platformFees;
@@ -41,7 +41,7 @@ export class SubscriptionService {
     const order = await this.razorpay.orders.create({
       amount: totalAmount * 100, // in paise
       currency: 'INR',
-      receipt: `sub_${userId}_${Date.now()}`,
+      receipt: `sub_${userId.toString().slice(-10)}_${Date.now()}`,
     });
 
     return {
@@ -55,8 +55,8 @@ export class SubscriptionService {
     const plan = await SubscriptionPlan.findById(data.planId);
     if (!plan) throw new Error('Subscription plan not found');
 
-    const expiryDate = plan.type === 'monthly' 
-      ? addMonths(new Date(), 1) 
+    const expiryDate = plan.type === 'monthly'
+      ? addMonths(new Date(), 1)
       : (plan.durationInDays > 0 ? addDays(new Date(), plan.durationInDays) : undefined);
 
     const subscription = await UserSubscription.create({
@@ -81,7 +81,7 @@ export class SubscriptionService {
     const order = await this.razorpay.orders.create({
       amount: settings.platformFees * 100, // in paise
       currency: 'INR',
-      receipt: `plat_${userId}_${Date.now()}`,
+      receipt: `plat_${userId.toString().slice(-10)}_${Date.now()}`,
     });
 
     await Payment.create({

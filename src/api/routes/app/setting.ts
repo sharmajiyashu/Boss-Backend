@@ -13,7 +13,7 @@ export default (router: Router) => {
       const settings = await AppSetting.findOne().select('platformFees reportReasons');
       return ResponseWrapper.success(res, settings, 'App settings fetched successfully');
     } catch (error: any) {
-      return ResponseWrapper.error(res, error.message);
+      return ResponseWrapper.error(res, error);
     }
   });
 };
