@@ -26,6 +26,14 @@ export interface IUser extends Document {
   };
   lastLoginAt?: Date;
   fcmTokens?: { token: string; deviceType?: string; updatedAt?: Date }[];
+  aadhaarVerification?: {
+    status: 'pending' | 'verified' | 'failed';
+    aadhaarNumber?: string;
+    referenceId?: string;
+    verifiedAt?: Date;
+  };
+  isVerified: boolean;
+  isPremium: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -63,6 +71,14 @@ const UserSchema: Schema = new Schema(
         updatedAt: { type: Date, default: () => new Date() },
       },
     ],
+    aadhaarVerification: {
+      status: { type: String, enum: ['pending', 'verified', 'failed'], default: 'pending' },
+      aadhaarNumber: { type: String },
+      referenceId: { type: String },
+      verifiedAt: { type: Date },
+    },
+    isVerified: { type: Boolean, default: false },
+    isPremium: { type: Boolean, default: false },
   },
   {
     timestamps: true,

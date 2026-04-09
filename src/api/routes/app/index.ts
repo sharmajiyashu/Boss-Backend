@@ -7,6 +7,8 @@ import user from './user';
 import userAction from './userAction';
 import subscription from './subscription';
 import chat from './chat';
+import verification from './verification';
+import setting from './setting';
 
 
 export default (router: Router): Router => {
@@ -18,5 +20,7 @@ export default (router: Router): Router => {
   userAction(router);
   subscription(router);
   chat(router);
+  verification(router);
+  setting(router);
   return router;
 };

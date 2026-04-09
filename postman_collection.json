@@ -682,6 +682,110 @@
 					]
 				},
 				{
+					"name": "App Settings",
+					"item": [
+						{
+							"name": "Get App Settings (Public)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/settings",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"settings"
+									]
+								},
+								"description": "Fetch platform fees and report reasons for the app."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Verification",
+					"item": [
+						{
+							"name": "Send Aadhaar OTP",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"aadhaar_number\": \"315342980398\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/verification/aadhaar/send-otp",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"verification",
+										"aadhaar",
+										"send-otp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Verify Aadhaar OTP",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"otp\": \"363836\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/verification/aadhaar/verify-otp",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"verification",
+										"aadhaar",
+										"verify-otp"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "Chat",
 					"description": "REST chat + Firebase push. Poll list/messages after notifications; no Socket.IO required for this flow.",
 					"item": [

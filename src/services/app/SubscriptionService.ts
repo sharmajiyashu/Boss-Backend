@@ -4,6 +4,8 @@ import UserSubscription from '../../models/UserSubscription';
 import Razorpay from 'razorpay';
 import config from '../../config';
 import { addDays, addMonths } from 'date-fns';
+import AppSetting from '../../models/AppSetting';
+import User from '../../models/User';
 
 @Service()
 export class SubscriptionService {
@@ -24,13 +26,28 @@ export class SubscriptionService {
     const plan = await SubscriptionPlan.findById(planId);
     if (!plan) throw new Error('Subscription plan not found');
 
+    const settings = await AppSetting.findOne();
+    const platformFees = settings?.platformFees || 0;
+
+    // Check if it's the user's first subscription
+    const subscriptionCount = await UserSubscription.countDocuments({ user: userId });
+    
+    let totalAmount = plan.price;
+    if (subscriptionCount === 0) {
+      totalAmount += platformFees;
+    }
+
     const order = await this.razorpay.orders.create({
-      amount: plan.price * 100, // in paise
+      amount: totalAmount * 100, // in paise
       currency: 'INR',
       receipt: `sub_${userId}_${Date.now()}`,
     });
 
-    return order;
+    return {
+      ...order,
+      platformFees: subscriptionCount === 0 ? platformFees : 0,
+      basePrice: plan.price
+    };
   }
 
   public async verifyAndActivateSubscription(userId: string, data: { planId: string; razorpayPaymentId: string; razorpayOrderId: string }) {
@@ -49,6 +66,9 @@ export class SubscriptionService {
       razorpayOrderId: data.razorpayOrderId,
       status: 'active'
     });
+
+    // Update user premium status
+    await User.findByIdAndUpdate(userId, { isPremium: true });
 
     return subscription;
   }

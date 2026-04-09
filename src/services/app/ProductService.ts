@@ -3,6 +3,9 @@ import Product from '../../models/Product';
 import Subcategory from '../../models/Subcategory';
 
 
+import User from '../../models/User';
+
+
 export interface IProductFilters {
   categoryId?: string;
   subcategoryId?: string;
@@ -83,6 +86,12 @@ export class ProductService {
   }
 
   public async createProduct(userId: string, data: any) {
+    // Check if user is verified or premium
+    const user = await User.findById(userId);
+    if (!user?.isVerified && !user?.isPremium) {
+      throw new Error('Please verify your Aadhaar or purchase a subscription to list products.');
+    }
+
     // 1. Validate custom fields if subcategory is provided
     if (data.subcategory) {
       const subcategory = await Subcategory.findById(data.subcategory);

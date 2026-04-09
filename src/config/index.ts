@@ -62,5 +62,10 @@ export default {
         serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
         /** Alternative: raw JSON string of the service account (for hosted envs) */
         serviceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || ''
+    },
+    digiverification: {
+        baseUrl: process.env.DIGIVERIFICATION_BASE_URL || 'https://api.digiverification.com',
+        partnerCode: process.env.DIGIVERIFICATION_PARTNER_CODE || 'ESP00116',
+        tokenKey: process.env.DIGIVERIFICATION_TOKEN_KEY || '735c6e47fe346bdec8c9fead340e1f911b5fcf9f'
     }
 };
