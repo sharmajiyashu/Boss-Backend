@@ -19,7 +19,7 @@ export class UserService {
             const skip = (page - 1) * limit;
 
             const query: any = { userRole: 'user' }; // List only standard users by default
-            
+
             if (filters.role) query.userRole = filters.role;
 
             if (filters.search) {
@@ -39,6 +39,7 @@ export class UserService {
                     .sort({ createdAt: -1 })
                     .skip(skip)
                     .limit(limit)
+                    .populate('profileImage')
                     .exec(),
                 User.countDocuments(query)
             ]);
