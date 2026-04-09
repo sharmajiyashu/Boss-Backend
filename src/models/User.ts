@@ -25,6 +25,7 @@ export interface IUser extends Document {
     zipcode?: string;
   };
   lastLoginAt?: Date;
+  fcmTokens?: { token: string; deviceType?: string; updatedAt?: Date }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,6 +56,13 @@ const UserSchema: Schema = new Schema(
       zipcode: { type: String },
     },
     lastLoginAt: { type: Date },
+    fcmTokens: [
+      {
+        token: { type: String, required: true },
+        deviceType: { type: String, enum: ['android', 'ios', 'web'] },
+        updatedAt: { type: Date, default: () => new Date() },
+      },
+    ],
   },
   {
     timestamps: true,

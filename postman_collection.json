@@ -593,6 +593,372 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "Register FCM Token",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"token\": \"YOUR_FCM_DEVICE_TOKEN\",\n    \"deviceType\": \"android\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/fcm-token",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user",
+										"fcm-token"
+									]
+								},
+								"description": "deviceType: optional — android | ios | web"
+							},
+							"response": []
+						},
+						{
+							"name": "Remove FCM Token",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"token\": \"YOUR_FCM_DEVICE_TOKEN\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/fcm-token",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user",
+										"fcm-token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Chat",
+					"description": "REST chat + Firebase push. Poll list/messages after notifications; no Socket.IO required for this flow.",
+					"item": [
+						{
+							"name": "Create or Get Direct Chat",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"participantId\": \"{{participantUserId}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/chats",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Chats (Inbox)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/chats?page=1&limit=20",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "20"
+										}
+									]
+								},
+								"description": "Includes unreadCount, isLastMessageSeenByOther, otherUser, lastMessagePreview."
+							},
+							"response": []
+						},
+						{
+							"name": "Upload Chat Images",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "images",
+											"description": "Add more rows with the same key \"images\" for multiple files (Postman) or use Send repeatedly.",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/chats/upload",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats",
+										"upload"
+									]
+								},
+								"description": "Returns mediaIds — use in Send Message body."
+							},
+							"response": []
+						},
+						{
+							"name": "Get Messages",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/chats/{{chatId}}/messages?page=1&limit=50",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats",
+										"{{chatId}}",
+										"messages"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "50"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Send Message",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"text\": \"Hello!\",\n    \"mediaIds\": []\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/chats/{{chatId}}/messages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats",
+										"{{chatId}}",
+										"messages"
+									]
+								},
+								"description": "Require at least one of: non-empty text or non-empty mediaIds (from Upload Chat Images)."
+							},
+							"response": []
+						},
+						{
+							"name": "Send Message (images only)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"mediaIds\": [\n        \"65f8a0b0c1d2e3f4a5b6c7da\"\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/chats/{{chatId}}/messages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats",
+										"{{chatId}}",
+										"messages"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Mark Chat Read",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/chats/{{chatId}}/read",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"chats",
+										"{{chatId}}",
+										"read"
+									]
+								},
+								"description": "Sets your lastReadAt — clears unread for this chat; updates seen state for the other user."
+							},
+							"response": []
 						}
 					]
 				},
@@ -702,6 +1068,18 @@
 			"key": "adminToken",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "chatId",
+			"value": "",
+			"type": "string",
+			"description": "Set from Create or Get Direct Chat response (_id)"
+		},
+		{
+			"key": "participantUserId",
+			"value": "",
+			"type": "string",
+			"description": "Other user's MongoDB ObjectId for 1:1 chat"
 		}
 	]
 }

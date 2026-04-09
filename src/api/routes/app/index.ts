@@ -6,6 +6,7 @@ import subcategory from './subcategory';
 import user from './user';
 import userAction from './userAction';
 import subscription from './subscription';
+import chat from './chat';
 
 
 export default (router: Router): Router => {
@@ -16,5 +17,6 @@ export default (router: Router): Router => {
   user(router);
   userAction(router);
   subscription(router);
+  chat(router);
   return router;
 };

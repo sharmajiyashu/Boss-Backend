@@ -56,5 +56,11 @@ export default {
     razorpay: {
         keyId: process.env.RAZORPAY_KEY_ID || '',
         keySecret: process.env.RAZORPAY_KEY_SECRET || ''
+    },
+    firebase: {
+        /** Absolute or relative path to Firebase service account JSON file */
+        serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
+        /** Alternative: raw JSON string of the service account (for hosted envs) */
+        serviceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || ''
     }
 };

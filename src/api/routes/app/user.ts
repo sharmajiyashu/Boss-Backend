@@ -3,6 +3,8 @@ import Container from 'typedi';
 import { UserService } from '../../../services/app/UserService';
 import { ResponseWrapper } from '../../responseWrapper';
 import { appAuthMiddleware } from '../../middleware/appAuthMiddleware';
+import { validate } from '../../validators';
+import { fcmTokenBodySchema, removeFcmTokenBodySchema } from '../../validators/chat';
 
 export default (router: Router) => {
   const userService = Container.get(UserService);
@@ -32,4 +34,36 @@ export default (router: Router) => {
         return ResponseWrapper.error(res, error.message);
       }
     });
+
+  router.post(
+    '/user/fcm-token',
+    appAuthMiddleware,
+    validate(fcmTokenBodySchema),
+    async (req: Request, res: Response) => {
+      try {
+        const userId = req.user.id;
+        const { token, deviceType } = req.body;
+        const result = await userService.registerFcmToken(userId, token, deviceType);
+        return ResponseWrapper.success(res, result, 'FCM token registered');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    }
+  );
+
+  router.delete(
+    '/user/fcm-token',
+    appAuthMiddleware,
+    validate(removeFcmTokenBodySchema),
+    async (req: Request, res: Response) => {
+      try {
+        const userId = req.user.id;
+        const { token } = req.body;
+        const result = await userService.removeFcmToken(userId, token);
+        return ResponseWrapper.success(res, result, 'FCM token removed');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    }
+  );
 };
