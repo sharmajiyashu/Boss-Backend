@@ -13,6 +13,7 @@ export interface IProductFilters {
   status?: string;
   page?: number;
   limit?: number;
+  [key: string]: any;
 }
 
 export interface IPaginatedProducts {
@@ -30,18 +31,32 @@ export class ProductService {
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
 
-    const query: any = { status: 'approved' }; // Only show approved products to general users
+    const { page: _p, limit: _l, categoryId, subcategoryId, search, status, ...customFilters } = filters;
 
-    if (filters.categoryId) {
-      query.category = filters.categoryId;
+    const query: any = { status: status || 'approved' }; // Default to approved for public, but allow status filter
+
+    if (categoryId) {
+      query.category = categoryId;
     }
 
-    if (filters.subcategoryId) {
-      query.subcategory = filters.subcategoryId;
+    if (subcategoryId) {
+      query.subcategory = subcategoryId;
     }
 
-    if (filters.search) {
-      query.name = { $regex: filters.search, $options: 'i' };
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    // Handle Dynamic Custom Field Filters
+    // These are any other query parameters passed in the filters object
+    if (Object.keys(customFilters).length > 0) {
+      for (const key in customFilters) {
+        if (customFilters[key]) {
+          // If value is a string, handle multi-value or simple regex
+          // Otherwise use exact match
+          query[`customFields.${key}`] = customFilters[key];
+        }
+      }
     }
 
     const [products, total] = await Promise.all([

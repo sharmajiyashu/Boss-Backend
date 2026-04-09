@@ -30,4 +30,4 @@ export const getProductQuerySchema = z.object({
     categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Category ID").optional(),
     subcategoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Subcategory ID").optional(),
     status: z.enum(['pending', 'approved', 'rejected', 'sold', 'inactive']).optional(),
-});
+}).passthrough();
