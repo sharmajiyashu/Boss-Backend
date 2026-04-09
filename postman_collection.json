@@ -1157,7 +1157,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Vintage Leather Jacket\",\n    \"description\": \"Genuine cowhide leather jacket, size L. Worn only a few times.\",\n    \"category\": \"65f8a0b0c1d2e3f4a5b6c7d8\",\n    \"subcategory\": \"65f8a0b0c1d2e3f4a5b6c7d9\",\n    \"price\": 4500,\n    \"stock\": 1,\n    \"media\": [\n        \"65f8a0b0c1d2e3f4a5b6c7da\"\n    ],\n    \"customFields\": {\n        \"brand\": \"Harley Davidson\",\n        \"size\": \"L\",\n        \"material\": \"Leather\",\n        \"condition\": \"Like New\"\n    }\n}",
+									"raw": "{\n    \"id\": \"OPTIONAL_PRODUCT_ID_FOR_UPDATE\",\n    \"name\": \"Vintage Leather Jacket\",\n    \"description\": \"Genuine cowhide leather jacket, size L. Worn only a few times.\",\n    \"category\": \"65f8a0b0c1d2e3f4a5b6c7d8\",\n    \"subcategory\": \"65f8a0b0c1d2e3f4a5b6c7d9\",\n    \"price\": 4500,\n    \"media\": [\n        \"65f8a0b0c1d2e3f4a5b6c7da\"\n    ],\n    \"customFields\": {\n        \"brand\": \"Harley Davidson\",\n        \"size\": \"L\",\n        \"material\": \"Leather\",\n        \"condition\": \"Like New\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1203,6 +1203,18 @@
 										{
 											"key": "search",
 											"value": "keyword",
+											"disabled": true
+										},
+										{
+											"key": "brand",
+											"value": "Samsung",
+											"description": "Example Custom Field Filter",
+											"disabled": true
+										},
+										{
+											"key": "color",
+											"value": "Red",
+											"description": "Example Custom Field Filter",
 											"disabled": true
 										},
 										{
