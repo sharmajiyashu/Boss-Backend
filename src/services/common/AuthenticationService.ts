@@ -78,8 +78,8 @@ export class AuthenticationService {
             zipcode?: string;
         }
     }): Promise<{ token: string; user: IUser }> {
-        const existingUser = await User.findOne({ 
-            $or: [{ email: data.email }, { mobile: data.mobile }] 
+        const existingUser = await User.findOne({
+            $or: [{ email: data.email }, { mobile: data.mobile }]
         });
 
         if (existingUser) {
@@ -128,9 +128,9 @@ export class AuthenticationService {
             throw new Error('Invalid email or password');
         }
 
-        if (!user.isEmailVerified) {
-            throw new Error('Please verify your email before logging in');
-        }
+        // if (!user.isEmailVerified) {
+        //     throw new Error('Please verify your email before logging in');
+        // }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
@@ -147,10 +147,10 @@ export class AuthenticationService {
     }
 
     async userVerifyEmail(email: string, otp: string): Promise<{ token: string; user: IUser }> {
-        const user = await User.findOne({ 
-            email, 
-            otp, 
-            otpExpires: { $gt: new Date() } 
+        const user = await User.findOne({
+            email,
+            otp,
+            otpExpires: { $gt: new Date() }
         }).populate('profileImage');
 
         if (!user) {
