@@ -52,6 +52,15 @@ export const verifyEmailSchema = z.object({
     otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
+export const resendOtpSchema = z.object({
+    email: z.string().email("Invalid email address").optional(),
+    mobile: z.string().length(10, "Mobile number must be 10 digits").regex(/^\d+$/, "Mobile number must contain only digits").optional(),
+    extension: z.string().regex(/^\d{1,4}$/, "Invalid extension (e.g. 91)").optional(),
+}).refine(data => data.email || (data.mobile && data.extension), {
+    message: "Email or Mobile with extension is required",
+    path: ["email", "mobile"],
+});
+
 export type SendOtpInput = z.infer<typeof sendOtpSchema>;
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
@@ -60,3 +69,4 @@ export type UserRegisterInput = z.infer<typeof userRegisterSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type ResendOtpInput = z.infer<typeof resendOtpSchema>;

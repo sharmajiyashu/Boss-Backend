@@ -3,7 +3,7 @@ import Container from "typedi";
 import { AuthenticationService } from "../../../services/common/AuthenticationService";
 import { ResponseWrapper } from '../../responseWrapper';
 import { validate } from '../../validators';
-import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema } from '../../validators/auth';
+import { sendOtpSchema, verifyOtpSchema, userLoginSchema, userRegisterSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, resendOtpSchema } from '../../validators/auth';
 
 export default (router: Router) => {
     const authService = Container.get(AuthenticationService);
@@ -92,6 +92,20 @@ export default (router: Router) => {
             try {
                 await authService.userResetPassword(req.body);
                 return ResponseWrapper.success(res, null, 'Password reset successfully');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error);
+            }
+        });
+
+    // POST /api/app/auth/resend-otp - Resend OTP
+    router.post('/auth/resend-otp',
+        validate(resendOtpSchema, 'body'),
+        async (req: Request, res: Response) => {
+            try {
+                const { email, extension, mobile } = req.body;
+                const resendData = email ? { email } : { mobile: `${extension}${mobile}` };
+                await authService.resendOtp(resendData);
+                return ResponseWrapper.success(res, null, 'OTP resent successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error);
             }

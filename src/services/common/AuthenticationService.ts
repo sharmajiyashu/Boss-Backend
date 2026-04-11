@@ -282,5 +282,40 @@ export class AuthenticationService {
             throw new Error('Invalid or expired token');
         }
     }
+
+    async resendOtp(data: { email?: string; mobile?: string }): Promise<void> {
+        if (!data.email && !data.mobile) {
+            throw new Error('Email or mobile is required');
+        }
+
+        const query = data.email ? { email: data.email } : { mobile: data.mobile };
+        const user = await User.findOne(query);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const otp = this.generateOTP();
+        const otpExpires = addMinutes(new Date(), CONSTANTS.OTP_EXPIRY_MINUTES);
+
+        user.otp = otp;
+        user.otpExpires = otpExpires;
+        await user.save();
+
+        if (data.email) {
+            try {
+                await this.emailService.sendAuthOtpEmail({
+                    to: data.email,
+                    secret: otp,
+                    purpose: user.isEmailVerified ? 'RESET_PASSWORD' : 'EMAIL_VERIFICATION'
+                });
+            } catch (error) {
+                AppLogger.error(`Failed to resend OTP email to ${data.email}: ${error}`);
+            }
+        } else {
+            // Mock: Send SMS
+            AppLogger.info(`Resending mobile OTP ${otp} to ${data.mobile}`);
+        }
+    }
 }
 
