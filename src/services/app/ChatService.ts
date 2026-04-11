@@ -29,7 +29,7 @@ function senderIdOf(message: { sender: unknown }): string {
 
 @Service()
 export class ChatService {
-    constructor(private firebasePush: FirebasePushService) {}
+    constructor(private firebasePush: FirebasePushService) { }
 
     private async assertCanChat(userId: string, otherId: string): Promise<void> {
         if (userId === otherId) throw new Error('Cannot chat with yourself');
@@ -104,8 +104,8 @@ export class ChatService {
             this.unreadCountForChat(c._id, userId, c.reads),
             c.lastMessage
                 ? Message.findById(c.lastMessage as mongoose.Types.ObjectId)
-                      .select('sender createdAt')
-                      .lean()
+                    .select('sender createdAt')
+                    .lean()
                 : null,
         ]);
         const seen = this.isOutgoingSeenByOther(lastMsgDoc, userId, c.participants, c.reads);
@@ -152,7 +152,11 @@ export class ChatService {
                 .skip(skip)
                 .limit(limit)
                 .populate('media')
-                .populate('sender', 'firstName lastName profileImage')
+                .populate({
+                    path: 'sender',
+                    select: 'firstName lastName profileImage',
+                    populate: { path: 'profileImage' },
+                })
                 .lean(),
             Message.countDocuments({ chat: chat._id }),
         ]);
@@ -220,7 +224,11 @@ export class ChatService {
 
         const populated = await Message.findById(message._id)
             .populate('media')
-            .populate('sender', 'firstName lastName profileImage')
+            .populate({
+                path: 'sender',
+                select: 'firstName lastName profileImage',
+                populate: { path: 'profileImage' },
+            })
             .lean();
 
         const recipientId = chat.participants.map((p) => p.toString()).find((id) => id !== userId);
