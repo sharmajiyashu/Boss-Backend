@@ -237,7 +237,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"123456\"\n}",
+									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"OTP_FROM_EMAIL\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -346,7 +346,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"extension\": \"91\",\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\"\n}",
+									"raw": "{\n    \"extension\": \"91\",\n    \"mobile\": \"9876543210\",\n    \"otp\": \"OTP_FROM_EMAIL\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -400,7 +400,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"123456\",\n    \"newPassword\": \"newpassword123\"\n}",
+									"raw": "{\n    \"email\": \"john@example.com\",\n    \"otp\": \"OTP_FROM_EMAIL\",\n    \"newPassword\": \"newpassword123\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"

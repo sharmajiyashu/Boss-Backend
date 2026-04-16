@@ -18,7 +18,7 @@ async function startServer() {
   return app.listen(config.port, () => {
     AppLogger.info(`👌 Server Listening on Port: ${config.port}
         **********************************
-               Pineapple Lifestyle API
+                BOS API
         **********************************
         DB Connection: MongoDB Atlas
         **********************************

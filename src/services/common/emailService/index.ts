@@ -44,8 +44,8 @@ export class EmailService {
   async sendAuthOtpEmail(options: SecretEmailOptions) {
     const subject =
       options.purpose === 'REGISTRATION'
-        ? 'Verify Your Email - PINEAPPLE'
-        : 'Password Reset - PINEAPPLE';
+        ? 'Verify Your Email - BOS'
+        : 'Password Reset - BOS';
 
     const htmlBody = `
       <!DOCTYPE html>
@@ -56,7 +56,7 @@ export class EmailService {
       </head>
       <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333;">PINEAPPLE</h1>
+          <h1 style="color: #333;">BOS</h1>
         </div>
         
         <div style="background-color: #f9f9f9; padding: 30px; border-radius: 10px; text-align: center;">
@@ -81,7 +81,7 @@ export class EmailService {
         </div>
         
         <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
-          <p>© 2025 PINEAPPLE. All rights reserved.</p>
+          <p>© 2025 BOS. All rights reserved.</p>
         </div>
       </body>
       </html>
