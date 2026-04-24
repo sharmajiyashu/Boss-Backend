@@ -7,6 +7,9 @@ import { MediaService } from '../../../services/common/MediaService';
 import upload from '../../middleware/upload';
 import { MediaType } from '../../../constants/enum';
 import User from '../../../models/User';
+import Product from '../../../models/Product';
+import Payment from '../../../models/Payment';
+import Chat from '../../../models/Chat';
 
 export default (router: Router) => {
     const userService = Container.get(UserService);
@@ -87,6 +90,73 @@ export default (router: Router) => {
             }
         });
 
+    // GET /api/admin/users/:id/listings - Get user's product listings
+    router.get('/users/:id/listings',
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.params.id as string;
+                const { status } = req.query as any;
+
+                const query: any = { seller: userId };
+                if (status) query.status = status;
+
+                const products = await Product.find(query)
+                    .populate({ path: 'category', populate: { path: 'media' } })
+                    .populate({ path: 'subcategory', populate: { path: 'media' } })
+                    .populate('media')
+                    .sort({ createdAt: -1 });
+
+                return ResponseWrapper.success(res, products, 'User listings fetched');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error);
+            }
+        });
+
+    // GET /api/admin/users/:id/interests - Get users who chatted about this user's products (interested buyers)
+    router.get('/users/:id/interests',
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.params.id as string;
+
+                // Find all chats where this user is a participant
+                const chats = await Chat.find({ participants: userId })
+                    .populate('participants', 'firstName lastName email mobile profileImage')
+                    .sort({ lastMessageAt: -1 });
+
+                // Map to interested users (the other participant)
+                const interests = chats.map(chat => {
+                    const otherParticipant = (chat.participants as any[]).find(
+                        (p: any) => p._id.toString() !== userId
+                    );
+                    return {
+                        _id: chat._id,
+                        user: otherParticipant,
+                        lastMessage: chat.lastMessagePreview,
+                        lastMessageAt: chat.lastMessageAt,
+                        createdAt: chat.createdAt,
+                    };
+                }).filter(i => i.user);
+
+                return ResponseWrapper.success(res, interests, 'Interested users fetched');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error);
+            }
+        });
+
+    // GET /api/admin/users/:id/payments - Get user's payment history
+    router.get('/users/:id/payments',
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.params.id as string;
+                const payments = await Payment.find({ user: userId })
+                    .sort({ createdAt: -1 });
+
+                return ResponseWrapper.success(res, payments, 'User payments fetched');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error);
+            }
+        });
+
     // PUT /api/admin/users/:id - Update user profile
     router.put('/users/:id',
         async (req: Request, res: Response) => {
@@ -101,5 +171,3 @@ export default (router: Router) => {
             }
         });
 }
-
-
