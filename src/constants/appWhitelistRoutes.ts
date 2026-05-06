@@ -10,4 +10,5 @@ export const appWhitelistRoutes = [
     '/subcategories',
     '/home',
     '/categories',
+    '/settings',
 ]
