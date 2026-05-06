@@ -10,8 +10,12 @@ export default (router: Router) => {
    */
   router.get('/settings', async (req: Request, res: Response) => {
     try {
-      const settings = await AppSetting.findOne().select('platformFees reportReasons');
-      return ResponseWrapper.success(res, settings, 'App settings fetched successfully');
+      const settings = await AppSetting.findOne();
+      // Return only platform fees and report reasons, hide other admin-only fields
+      return ResponseWrapper.success(res, {
+        platformFees: settings?.platformFees,
+        reportReasons: settings?.reportReasons,
+      }, 'App settings fetched successfully');
     } catch (error: any) {
       return ResponseWrapper.error(res, error);
     }
