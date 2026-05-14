@@ -10,6 +10,7 @@ import chat from './chat';
 import verification from './verification';
 import setting from './setting';
 import payment from './payment';
+import location from './location';
 
 
 export default (router: Router): Router => {
@@ -24,5 +25,6 @@ export default (router: Router): Router => {
   verification(router);
   setting(router);
   payment(router);
+  location(router);
   return router;
 };

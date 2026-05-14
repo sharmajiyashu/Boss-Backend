@@ -4,6 +4,7 @@ import { seedSettings } from './SettingSeeder';
 import AppLogger from '../api/loaders/logger';
 import { adminSeed } from './adminSeeder';
 import { seedUsers } from './UserSeeder';
+import { seedWorldCities } from './WorldCitySeeder';
 
 async function main() {
   try {
@@ -16,6 +17,7 @@ async function main() {
     await seedSettings();
     await adminSeed();
     await seedUsers();
+    await seedWorldCities();
 
     AppLogger.info('✅ All seeders completed successfully!');
     process.exit(0);
