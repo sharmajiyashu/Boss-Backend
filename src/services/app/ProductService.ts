@@ -13,6 +13,9 @@ export interface IProductFilters {
   status?: string;
   page?: number;
   limit?: number;
+  lat?: number;
+  lng?: number;
+  radius?: number; // In KM
   [key: string]: any;
 }
 
@@ -31,7 +34,7 @@ export class ProductService {
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
 
-    const { page: _p, limit: _l, categoryId, subcategoryId, search, status, ...customFilters } = filters;
+    const { page: _p, limit: _l, categoryId, subcategoryId, search, status, lat, lng, radius, ...customFilters } = filters;
 
     const query: any = { status: status || 'approved' }; // Default to approved for public, but allow status filter
 
@@ -45,6 +48,19 @@ export class ProductService {
 
     if (search) {
       query.name = { $regex: search, $options: 'i' };
+    }
+
+    if (lat && lng) {
+      const radiusInKm = radius || 50; // Default 50km
+      query.geometry = {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [Number(lng), Number(lat)],
+          },
+          $maxDistance: radiusInKm * 1000, // Convert to meters
+        },
+      };
     }
 
     // Handle Dynamic Custom Field Filters
@@ -143,6 +159,13 @@ export class ProductService {
         throw new Error('Product not found or unauthorized');
       }
 
+      if (data.location?.lat && data.location?.lng) {
+        data.geometry = {
+          type: 'Point',
+          coordinates: [Number(data.location.lng), Number(data.location.lat)]
+        };
+      }
+
       Object.assign(product, {
         ...data,
         status: 'pending' // Reset to pending on update
@@ -152,6 +175,13 @@ export class ProductService {
       return product;
     } else {
       // Create new product
+      if (data.location?.lat && data.location?.lng) {
+        data.geometry = {
+          type: 'Point',
+          coordinates: [Number(data.location.lng), Number(data.location.lat)]
+        };
+      }
+
       const product = new Product({
         ...data,
         seller: userId,

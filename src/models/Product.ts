@@ -10,6 +10,18 @@ export interface IProduct extends Document {
   price: number;
   customFields?: Record<string, any>; // Stores key-value pairs (e.g., { "brand": "Apple" })
   status: 'pending' | 'approved' | 'rejected' | 'sold' | 'inactive';
+  location?: {
+    lat: number;
+    lng: number;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipcode?: string;
+  };
+  geometry?: {
+    type: string;
+    coordinates: number[];
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,10 +37,24 @@ const ProductSchema: Schema = new Schema(
     price: { type: Number, required: true, default: 0 },
     customFields: { type: Schema.Types.Mixed }, // Dynamic object for easy filtering
     status: { type: String, enum: ['pending', 'approved', 'rejected', 'sold', 'inactive'], default: 'pending' },
+    location: {
+      lat: { type: Number },
+      lng: { type: Number },
+      address: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zipcode: { type: String },
+    },
+    geometry: {
+      type: { type: String, enum: ['Point'], default: 'Point' },
+      coordinates: { type: [Number] }, // [lng, lat]
+    },
   },
   {
     timestamps: true,
   }
 );
+
+ProductSchema.index({ geometry: '2dsphere' });
 
 export default mongoose.model<IProduct>('Product', ProductSchema);

@@ -10,6 +10,14 @@ export const createProductSchema = z.object({
     price: z.coerce.number().min(0, "Price must be at least 0"),
     customFields: z.record(z.string(), z.any()).optional(),
     status: z.enum(['pending', 'approved', 'rejected', 'sold', 'inactive']).default('pending'),
+    location: z.object({
+        lat: z.coerce.number(),
+        lng: z.coerce.number(),
+        address: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipcode: z.string().optional(),
+    }).optional(),
 });
 
 export const updateProductSchema = z.object({
@@ -21,6 +29,14 @@ export const updateProductSchema = z.object({
     price: z.coerce.number().min(0).optional(),
     customFields: z.record(z.string(), z.any()).optional(),
     status: z.enum(['pending', 'approved', 'rejected', 'sold', 'inactive']).optional(),
+    location: z.object({
+        lat: z.coerce.number(),
+        lng: z.coerce.number(),
+        address: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipcode: z.string().optional(),
+    }).optional(),
 });
 
 export const getProductQuerySchema = z.object({
@@ -30,4 +46,7 @@ export const getProductQuerySchema = z.object({
     categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Category ID").optional(),
     subcategoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Subcategory ID").optional(),
     status: z.enum(['pending', 'approved', 'rejected', 'sold', 'inactive']).optional(),
+    lat: z.coerce.number().optional(),
+    lng: z.coerce.number().optional(),
+    radius: z.coerce.number().optional(),
 }).passthrough();
