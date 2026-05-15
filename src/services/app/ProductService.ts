@@ -85,7 +85,11 @@ export class ProductService {
           path: 'subcategory',
           populate: { path: 'media' }
         })
-        .populate('seller', 'firstName lastName email')
+        .populate({
+          path: 'seller',
+          select: 'firstName lastName email profileImage location',
+          populate: { path: 'profileImage' }
+        })
         .populate('media')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -112,7 +116,11 @@ export class ProductService {
         path: 'subcategory',
         populate: { path: 'media' }
       })
-      .populate('seller', 'firstName lastName email')
+      .populate({
+        path: 'seller',
+        select: 'firstName lastName email profileImage location',
+        populate: { path: 'profileImage' }
+      })
       .populate('media');
   }
 
@@ -225,6 +233,11 @@ export class ProductService {
         .populate({
           path: 'subcategory',
           populate: { path: 'media' }
+        })
+        .populate({
+          path: 'seller',
+          select: 'firstName lastName email profileImage location',
+          populate: { path: 'profileImage' }
         })
         .populate('media')
         .sort({ createdAt: -1 })
