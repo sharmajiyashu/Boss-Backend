@@ -159,7 +159,7 @@ export class ProductService {
         throw new Error('Product not found or unauthorized');
       }
 
-      if (data.location?.lat && data.location?.lng) {
+      if (data.location?.lat !== undefined && data.location?.lng !== undefined) {
         data.geometry = {
           type: 'Point',
           coordinates: [Number(data.location.lng), Number(data.location.lat)]
@@ -175,7 +175,7 @@ export class ProductService {
       return product;
     } else {
       // Create new product
-      if (data.location?.lat && data.location?.lng) {
+      if (data.location?.lat !== undefined && data.location?.lng !== undefined) {
         data.geometry = {
           type: 'Point',
           coordinates: [Number(data.location.lng), Number(data.location.lat)]

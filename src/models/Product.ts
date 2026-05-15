@@ -46,7 +46,7 @@ const ProductSchema: Schema = new Schema(
       zipcode: { type: String },
     },
     geometry: {
-      type: { type: String, enum: ['Point'], default: 'Point' },
+      type: { type: String, enum: ['Point'] },
       coordinates: { type: [Number] }, // [lng, lat]
     },
   },
