@@ -35,6 +35,32 @@ export default (router: Router) => {
       }
     });
 
+  // GET /api/app/profile/location - Get current user location
+  router.get('/profile/location',
+    appAuthMiddleware,
+    async (req: Request, res: Response) => {
+      try {
+        const userId = (req as any).user.id;
+        const location = await userService.getLocation(userId);
+        return ResponseWrapper.success(res, location, 'Location fetched successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
+
+  // POST /api/app/profile/location - Update current user location
+  router.post('/profile/location',
+    appAuthMiddleware,
+    async (req: Request, res: Response) => {
+      try {
+        const userId = (req as any).user.id;
+        const location = await userService.updateLocation(userId, req.body);
+        return ResponseWrapper.success(res, location, 'Location updated successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
+
   router.post(
     '/user/fcm-token',
     appAuthMiddleware,

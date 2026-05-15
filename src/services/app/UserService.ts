@@ -13,6 +13,20 @@ export class UserService {
     return User.findByIdAndUpdate(userId, data, { new: true }).populate('profileImage');
   }
 
+  public async getLocation(userId: string) {
+    const user = await User.findById(userId).select('location');
+    return user?.location;
+  }
+
+  public async updateLocation(userId: string, locationData: any) {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: { location: locationData } },
+      { new: true }
+    ).select('location');
+    return user?.location;
+  }
+
   /** Register device token for Firebase push (chat). Removes token from other users if reused. */
   public async registerFcmToken(userId: string, token: string, deviceType?: 'android' | 'ios' | 'web') {
     await User.updateMany(
