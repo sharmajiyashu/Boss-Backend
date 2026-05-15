@@ -61,13 +61,15 @@ export class ProductService {
       }
     }
 
-    if (searchLat && searchLng) {
-      const radiusInKm = Number(radius) || 50; // Default to 50km radius if not specified
-      query.geometry = {
-        $geoWithin: {
-          $centerSphere: [[Number(searchLng), Number(searchLat)], radiusInKm / 6378.1], // 6378.1 is Earth's radius in km
-        },
-      };
+    if (searchLat && searchLng && radius) {
+      const radiusInKm = Number(radius);
+      if (radiusInKm > 0) {
+        query.geometry = {
+          $geoWithin: {
+            $centerSphere: [[Number(searchLng), Number(searchLat)], radiusInKm / 6378.1], // 6378.1 is Earth's radius in km
+          },
+        };
+      }
     }
 
     // Handle Dynamic Custom Field Filters
