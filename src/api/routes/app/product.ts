@@ -18,11 +18,13 @@ export default (router: Router) => {
 
   // GET /api/products - Get all approved products with filters and pagination
   router.get('/products',
+    appAuthMiddleware,
     validate(getProductQuerySchema, 'query'),
     async (req: Request, res: Response) => {
       try {
         const filters = req.query as any;
-        const result = await productService.getProducts(filters);
+        const userId = (req as any).user?.id;
+        const result = await productService.getProducts(filters, userId);
         return ResponseWrapper.success(res, result, 'Products fetched successfully');
       } catch (error: any) {
         return ResponseWrapper.error(res, error.message);

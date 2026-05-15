@@ -29,7 +29,7 @@ export interface IPaginatedProducts {
 
 @Service()
 export class ProductService {
-  public async getProducts(filters: IProductFilters): Promise<IPaginatedProducts> {
+  public async getProducts(filters: IProductFilters, userId?: string): Promise<IPaginatedProducts> {
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
@@ -50,17 +50,31 @@ export class ProductService {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    if (lat && lng) {
-      const radiusInKm = radius || 50; // Default 50km
-      query.geometry = {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [Number(lng), Number(lat)],
-          },
-          $maxDistance: radiusInKm * 1000, // Convert to meters
+    let searchLat = lat;
+    let searchLng = lng;
+
+    if (!searchLat && !searchLng && userId) {
+      const user = await User.findById(userId);
+      if (user?.location?.lat && user?.location?.lng) {
+        searchLat = user.location.lat;
+        searchLng = user.location.lng;
+      }
+    }
+
+    if (searchLat && searchLng) {
+      const radiusInKm = Number(radius) || 0;
+      const nearQuery: any = {
+        $geometry: {
+          type: 'Point',
+          coordinates: [Number(searchLng), Number(searchLat)],
         },
       };
+
+      if (radiusInKm > 0) {
+        nearQuery.$maxDistance = radiusInKm * 1000; // Convert to meters
+      }
+
+      query.geometry = { $near: nearQuery };
     }
 
     // Handle Dynamic Custom Field Filters
