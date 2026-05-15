@@ -62,19 +62,12 @@ export class ProductService {
     }
 
     if (searchLat && searchLng) {
-      const radiusInKm = Number(radius) || 0;
-      const nearQuery: any = {
-        $geometry: {
-          type: 'Point',
-          coordinates: [Number(searchLng), Number(searchLat)],
+      const radiusInKm = Number(radius) || 50; // Default to 50km radius if not specified
+      query.geometry = {
+        $geoWithin: {
+          $centerSphere: [[Number(searchLng), Number(searchLat)], radiusInKm / 6378.1], // 6378.1 is Earth's radius in km
         },
       };
-
-      if (radiusInKm > 0) {
-        nearQuery.$maxDistance = radiusInKm * 1000; // Convert to meters
-      }
-
-      query.geometry = { $near: nearQuery };
     }
 
     // Handle Dynamic Custom Field Filters
