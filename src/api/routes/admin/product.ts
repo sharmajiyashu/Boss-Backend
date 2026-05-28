@@ -4,7 +4,7 @@ import { AdminProductService } from '../../../services/admin/AdminProductService
 import { ResponseWrapper } from '../../responseWrapper';
 import { adminAuthMiddleware } from '../../middleware/adminAuthMiddleware';
 import { validate } from '../../validators';
-import { getProductQuerySchema } from '../../validators/product';
+import { getProductQuerySchema, updateProductSchema } from '../../validators/product';
 
 export default (router: Router) => {
   const adminProductService = Container.get(AdminProductService);
@@ -46,6 +46,35 @@ export default (router: Router) => {
         const updatedProduct = await adminProductService.rejectProduct(productId);
         if (!updatedProduct) return ResponseWrapper.error(res, 'Product not found', 404);
         return ResponseWrapper.success(res, updatedProduct, 'Product rejected successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
+
+  // DELETE /api/admin/products/:id - Delete a product
+  router.delete('/admin/products/:id',
+    adminAuthMiddleware,
+    async (req: Request, res: Response) => {
+      try {
+        const productId = req.params.id as string;
+        const result = await adminProductService.deleteProduct(productId);
+        if (!result) return ResponseWrapper.error(res, 'Product not found', 404);
+        return ResponseWrapper.success(res, null, 'Product deleted successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
+
+  // PUT /api/admin/products/:id - Edit a product
+  router.put('/admin/products/:id',
+    adminAuthMiddleware,
+    validate(updateProductSchema, 'body'),
+    async (req: Request, res: Response) => {
+      try {
+        const productId = req.params.id as string;
+        const updatedProduct = await adminProductService.updateProduct(productId, req.body);
+        if (!updatedProduct) return ResponseWrapper.error(res, 'Product not found', 404);
+        return ResponseWrapper.success(res, updatedProduct, 'Product updated successfully');
       } catch (error: any) {
         return ResponseWrapper.error(res, error.message);
       }

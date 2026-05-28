@@ -61,4 +61,23 @@ export class AdminProductService {
   public async rejectProduct(productId: string) {
     return Product.findByIdAndUpdate(productId, { status: 'rejected' }, { new: true });
   }
+
+  public async deleteProduct(productId: string): Promise<boolean> {
+    const result = await Product.findByIdAndDelete(productId);
+    return !!result;
+  }
+
+  public async updateProduct(productId: string, data: Partial<any>): Promise<any | null> {
+    return Product.findByIdAndUpdate(productId, data, { new: true })
+      .populate({
+        path: 'category',
+        populate: { path: 'media' }
+      })
+      .populate({
+        path: 'subcategory',
+        populate: { path: 'media' }
+      })
+      .populate('seller', 'firstName lastName email')
+      .populate('media');
+  }
 }
