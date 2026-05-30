@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import Container from 'typedi';
 import { ProductService } from '../../../services/app/ProductService';
 import Product from '../../../models/Product';
@@ -105,15 +106,26 @@ export default (router: Router) => {
     }
   );
 
-  // POST /api/products - Create a new product listing (takes media IDs)
+  // POST /api/products - Create or update a product listing (takes media IDs)
   router.post('/products',
     appAuthMiddleware,
-    validate(createProductSchema, 'body'),
+    (req: Request, res: Response, next: NextFunction) => {
+      const isUpdate = !!req.body.id;
+      const schema = isUpdate
+        ? updateProductSchema.extend({
+          id: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Product ID")
+        })
+        : createProductSchema;
+      validate(schema, 'body')(req, res, next);
+    },
     async (req: Request, res: Response) => {
       try {
         const userId = (req as any).user.id;
+        const isUpdate = !!req.body.id;
         const product = await productService.createProduct(userId, req.body);
-        return ResponseWrapper.success(res, product, 'Product listing created successfully', 201);
+        const message = isUpdate ? 'Product updated successfully' : 'Product listing created successfully';
+        const statusCode = isUpdate ? 200 : 201;
+        return ResponseWrapper.success(res, product, message, statusCode);
       } catch (error: any) {
         return ResponseWrapper.error(res, error.message);
       }
