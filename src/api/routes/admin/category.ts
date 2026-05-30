@@ -98,6 +98,17 @@ export default (router: Router) => {
             }
         });
 
+    // DELETE /api/admin/categories - Delete all categories
+    router.delete('/categories',
+        async (req: Request, res: Response) => {
+            try {
+                await categoryService.deleteAllCategories();
+                return ResponseWrapper.success(res, null, 'All categories deleted successfully');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error.message);
+            }
+        });
+
     // DELETE /api/admin/categories/:id - Delete a category
     router.delete('/categories/:id',
         async (req: Request, res: Response) => {

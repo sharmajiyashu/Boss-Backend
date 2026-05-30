@@ -51,6 +51,18 @@ export default (router: Router) => {
       }
     });
 
+  // DELETE /api/admin/admin/products - Delete all products
+  router.delete('/admin/products',
+    adminAuthMiddleware,
+    async (req: Request, res: Response) => {
+      try {
+        await adminProductService.deleteAllProducts();
+        return ResponseWrapper.success(res, null, 'All products deleted successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    });
+
   // DELETE /api/admin/products/:id - Delete a product
   router.delete('/admin/products/:id',
     adminAuthMiddleware,

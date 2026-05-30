@@ -67,6 +67,11 @@ export class AdminProductService {
     return !!result;
   }
 
+  public async deleteAllProducts(): Promise<boolean> {
+    await Product.deleteMany({});
+    return true;
+  }
+
   public async updateProduct(productId: string, data: Partial<any>): Promise<any | null> {
     return Product.findByIdAndUpdate(productId, data, { new: true })
       .populate({

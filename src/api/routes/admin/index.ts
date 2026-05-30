@@ -6,6 +6,7 @@ import subcategory from './subcategory';
 import user from './user';
 import product from './product';
 import setting from './setting';
+import cms from './cms';
 import dashboard from './dashboard';
 import state from './state';
 import city from './city';
@@ -19,6 +20,7 @@ export default (router: Router): Router => {
     user(router);
     product(router);
     setting(router);
+    cms(router);
     dashboard(router);
     state(router);
     city(router);

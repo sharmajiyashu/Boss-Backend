@@ -5,6 +5,7 @@ import AppLogger from '../api/loaders/logger';
 import { adminSeed } from './adminSeeder';
 import { seedUsers } from './UserSeeder';
 import { seedWorldCities } from './WorldCitySeeder';
+import { seedCMSPages } from './CMSPageSeeder';
 
 async function main() {
   try {
@@ -13,11 +14,12 @@ async function main() {
 
     AppLogger.info('🌱 Starting database seeders...');
 
-    // 2️⃣ Run the Settings Seeder
+    // 2️⃣ Run Seeders
     await seedSettings();
     await adminSeed();
     await seedUsers();
     await seedWorldCities();
+    await seedCMSPages();
 
     AppLogger.info('✅ All seeders completed successfully!');
     process.exit(0);

@@ -170,4 +170,29 @@ export default (router: Router) => {
                 return ResponseWrapper.error(res, error);
             }
         });
+
+    // DELETE /api/admin/users - Delete all users
+    router.delete('/users',
+        async (req: Request, res: Response) => {
+            try {
+                await userService.deleteAllUsers();
+                return ResponseWrapper.success(res, null, 'All users deleted successfully');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error.message || error);
+            }
+        });
+
+    // DELETE /api/admin/users/:id - Delete a user
+    router.delete('/users/:id',
+        async (req: Request, res: Response) => {
+            try {
+                const id = req.params.id as string;
+                const result = await userService.deleteUser(id);
+                if (!result) return ResponseWrapper.error(res, 'User not found', 404);
+
+                return ResponseWrapper.success(res, null, 'User deleted successfully');
+            } catch (error: any) {
+                return ResponseWrapper.error(res, error.message || error);
+            }
+        });
 }

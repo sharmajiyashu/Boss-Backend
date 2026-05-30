@@ -74,4 +74,36 @@ export class UserService {
     public async updateUser(id: string, data: Partial<IUser>): Promise<IUser | null> {
         return User.findByIdAndUpdate(id, data, { new: true });
     }
+
+    /**
+     * Delete user details (for admin).
+     */
+    public async deleteUser(id: string): Promise<boolean> {
+        try {
+            const result = await User.findByIdAndDelete(id);
+            if (!result) {
+                AppLogger.warn(`⚠️ User ${id} not found for deletion.`);
+                return false;
+            }
+            AppLogger.info(`✌️ User ${id} deleted successfully.`);
+            return true;
+        } catch (error) {
+            AppLogger.error(`❌ Error deleting user ${id}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Delete all users.
+     */
+    public async deleteAllUsers(): Promise<boolean> {
+        try {
+            await User.deleteMany({});
+            AppLogger.info('✌️ All users deleted successfully.');
+            return true;
+        } catch (error) {
+            AppLogger.error('❌ Error deleting all users:', error);
+            throw error;
+        }
+    }
 }

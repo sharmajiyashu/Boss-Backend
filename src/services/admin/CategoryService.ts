@@ -101,6 +101,20 @@ export class CategoryService {
     }
 
     /**
+     * Delete all categories.
+     */
+    public async deleteAllCategories(): Promise<boolean> {
+        try {
+            await Category.deleteMany({});
+            AppLogger.info('✌️ All categories deleted successfully.');
+            return true;
+        } catch (error) {
+            AppLogger.error('❌ Error deleting all categories:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Get a single category by ID.
      */
     public async getCategoryById(id: string): Promise<ICategory | null> {
