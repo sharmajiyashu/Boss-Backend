@@ -11,6 +11,7 @@ import dashboard from './dashboard';
 import state from './state';
 import city from './city';
 import country from './country';
+import call from './call';
 
 
 export default (router: Router): Router => {
@@ -25,5 +26,6 @@ export default (router: Router): Router => {
     state(router);
     city(router);
     country(router);
+    call(router);
     return router;
 };

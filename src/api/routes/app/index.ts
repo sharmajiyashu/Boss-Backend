@@ -11,6 +11,7 @@ import verification from './verification';
 import setting from './setting';
 import payment from './payment';
 import location from './location';
+import call from './call';
 
 
 export default (router: Router): Router => {
@@ -26,5 +27,6 @@ export default (router: Router): Router => {
   setting(router);
   payment(router);
   location(router);
+  call(router);
   return router;
 };
