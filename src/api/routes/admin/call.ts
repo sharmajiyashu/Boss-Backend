@@ -4,8 +4,7 @@ import { CallService } from '../../../services/admin/CallService';
 import { ResponseWrapper } from '../../responseWrapper';
 
 export default (router: Router) => {
-    // Resolve AdminCallService by its typedi key
-    const callService = Container.get<CallService>('AdminCallService');
+    const callService = Container.get(CallService);
 
     // GET /api/admin/calls - List scheduled calls
     router.get('/calls',

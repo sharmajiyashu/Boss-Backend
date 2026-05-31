@@ -5,7 +5,8 @@ import User from '../../models/User';
 import { IPagination, IPaginatedResponse } from '../../interfaces';
 import AppLogger from '../../api/loaders/logger';
 
-@Service('AdminCallService')
+@Service()
+
 export class CallService {
     /**
      * List all scheduled calls (for admin)
