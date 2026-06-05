@@ -20,9 +20,7 @@ export class AuthenticationService {
     private generateToken(userId: string, role: string): string {
         const payload = { userId, role };
         const secret = config.auth.secret;
-        const options: jwt.SignOptions = {
-            expiresIn: CONSTANTS.JWT_ACCESS_EXPIRY
-        };
+        const options: jwt.SignOptions = {};
         return jwt.sign(payload, secret, options) as string;
     }
 
