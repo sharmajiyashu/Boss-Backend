@@ -34,7 +34,21 @@ export class ProductService {
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
 
-    const { page: _p, limit: _l, categoryId, subcategoryId, search, status, lat, lng, radius, ...customFilters } = filters;
+    const {
+      page: _p,
+      limit: _l,
+      categoryId,
+      subcategoryId,
+      search,
+      status,
+      lat,
+      lng,
+      radius,
+      addressId: _addressId,
+      saveToAddresses: _saveToAddresses,
+      label: _label,
+      ...customFilters
+    } = filters;
 
     const query: any = { status: status || 'approved' }; // Default to approved for public, but allow status filter
 
@@ -50,19 +64,29 @@ export class ProductService {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    let searchLat = lat;
-    let searchLng = lng;
+    let searchLat: number | undefined;
+    let searchLng: number | undefined;
+    let usedSavedUserLocation = false;
 
-    if (!searchLat && !searchLng && userId) {
-      const user = await User.findById(userId);
-      if (user?.location?.lat && user?.location?.lng) {
+    if (lat !== undefined && lng !== undefined) {
+      searchLat = Number(lat);
+      searchLng = Number(lng);
+    } else if (userId) {
+      const user = await User.findById(userId).select('location');
+      if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
         searchLat = user.location.lat;
         searchLng = user.location.lng;
+        usedSavedUserLocation = true;
       }
     }
 
-    if (searchLat && searchLng && radius) {
-      const radiusInKm = Number(radius);
+    let searchRadiusKm = radius !== undefined ? Number(radius) : undefined;
+    if (searchRadiusKm === undefined && usedSavedUserLocation) {
+      searchRadiusKm = 50;
+    }
+
+    if (searchLat !== undefined && searchLng !== undefined && searchRadiusKm !== undefined && searchRadiusKm > 0) {
+      const radiusInKm = searchRadiusKm;
       if (radiusInKm > 0) {
         query.geometry = {
           $geoWithin: {

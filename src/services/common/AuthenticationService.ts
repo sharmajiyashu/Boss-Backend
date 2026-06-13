@@ -84,12 +84,34 @@ export class AuthenticationService {
 
         const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : undefined;
 
+        const registrationLocation = data.location;
+        const initialAddress = registrationLocation?.lat !== undefined && registrationLocation?.lng !== undefined
+            ? [{
+                label: 'Home',
+                lat: registrationLocation.lat,
+                lng: registrationLocation.lng,
+                address: registrationLocation.address,
+                city: registrationLocation.city,
+                state: registrationLocation.state,
+                zipcode: registrationLocation.zipcode,
+                isDefault: true,
+            }]
+            : undefined;
+
         const user = await User.create({
             ...data,
             password: hashedPassword,
             userRole: 'user',
             referralCode: this.generateReferralCode(),
             isEmailVerified: false, // Must verify email
+            location: registrationLocation
+                ? {
+                    ...registrationLocation,
+                    label: 'Home',
+                    source: 'custom',
+                }
+                : undefined,
+            addresses: initialAddress,
         });
 
         // Send OTP via email

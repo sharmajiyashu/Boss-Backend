@@ -1,5 +1,29 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IUserAddress {
+  _id?: mongoose.Types.ObjectId;
+  label: string;
+  lat: number;
+  lng: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  isDefault?: boolean;
+}
+
+export interface IUserLocation {
+  lat?: number;
+  lng?: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  label?: string;
+  addressId?: mongoose.Types.ObjectId;
+  source?: 'saved' | 'custom' | 'gps';
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
@@ -16,14 +40,8 @@ export interface IUser extends Document {
   profileImage?: mongoose.Types.ObjectId;
   blockedUsers: mongoose.Types.ObjectId[];
   isBlocked: boolean;
-  location?: {
-    lat?: number;
-    lng?: number;
-    address?: string;
-    city?: string;
-    state?: string;
-    zipcode?: string;
-  };
+  location?: IUserLocation;
+  addresses?: IUserAddress[];
   lastLoginAt?: Date;
   fcmTokens?: { token: string; deviceType?: string; updatedAt?: Date }[];
   aadhaarVerification?: {
@@ -64,7 +82,22 @@ const UserSchema: Schema = new Schema(
       city: { type: String },
       state: { type: String },
       zipcode: { type: String },
+      label: { type: String },
+      addressId: { type: Schema.Types.ObjectId },
+      source: { type: String, enum: ['saved', 'custom', 'gps'] },
     },
+    addresses: [
+      {
+        label: { type: String, required: true },
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+        address: { type: String },
+        city: { type: String },
+        state: { type: String },
+        zipcode: { type: String },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
     lastLoginAt: { type: Date },
     fcmTokens: [
       {
