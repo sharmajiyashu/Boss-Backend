@@ -6,6 +6,7 @@ export interface IFieldDefinition {
   options?: string[];
   isFilterable: boolean;
   isRequired: boolean;
+  sortOrder?: number;
 }
 
 export interface ISubcategory extends Document {
@@ -30,6 +31,7 @@ const FieldDefinitionSchema: Schema = new Schema({
   options: [{ type: String }],
   isFilterable: { type: Boolean, default: false },
   isRequired: { type: Boolean, default: false },
+  sortOrder: { type: Number, default: 0 },
 }, { _id: false });
 
 const SubcategorySchema: Schema = new Schema(

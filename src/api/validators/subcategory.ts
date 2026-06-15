@@ -7,6 +7,7 @@ const fieldDefinitionSchema = z.object({
     options: z.array(z.string()).optional(),
     isFilterable: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),
     isRequired: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),
+    sortOrder: z.coerce.number().optional(),
 });
 
 export const createSubcategorySchema = z.object({

@@ -1,9 +1,30 @@
 import { Service } from 'typedi';
 import mongoose from 'mongoose';
-import Subcategory, { ISubcategory } from '../../models/Subcategory';
+import Subcategory, { IFieldDefinition, ISubcategory } from '../../models/Subcategory';
 import Product from '../../models/Product';
 import { IPagination, IPaginatedResponse } from '../../interfaces';
 import AppLogger from '../../api/loaders/logger';
+
+function sortCustomFieldDefinitions(fields?: IFieldDefinition[]): IFieldDefinition[] | undefined {
+    if (!fields?.length) return fields;
+    return [...fields].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+function withSortedCustomFields<T extends { customFieldDefinitions?: IFieldDefinition[] }>(item: T): T {
+    if (!item.customFieldDefinitions?.length) return item;
+    return {
+        ...item,
+        customFieldDefinitions: sortCustomFieldDefinitions(item.customFieldDefinitions),
+    };
+}
+
+function normalizeCustomFieldDefinitions(fields?: IFieldDefinition[]): IFieldDefinition[] | undefined {
+    if (!fields) return fields;
+    return fields.map((field, index) => ({
+        ...field,
+        sortOrder: field.sortOrder ?? index,
+    }));
+}
 
 @Service()
 export class SubcategoryService {
@@ -41,10 +62,14 @@ export class SubcategoryService {
      */
     public async createSubcategory(data: Partial<ISubcategory>): Promise<ISubcategory> {
         try {
-            const subcategory = await Subcategory.create(data);
+            const payload = {
+                ...data,
+                customFieldDefinitions: normalizeCustomFieldDefinitions(data.customFieldDefinitions),
+            };
+            const subcategory = await Subcategory.create(payload);
             const populatedSubcategory = await subcategory.populate(['media', { path: 'category', populate: 'media' }]);
             AppLogger.info(`✌️ Subcategory ${populatedSubcategory.name} created successfully.`);
-            return populatedSubcategory;
+            return withSortedCustomFields(populatedSubcategory.toObject()) as ISubcategory;
         } catch (error) {
             AppLogger.error('❌ Error creating subcategory:', error);
             throw error;
@@ -85,7 +110,7 @@ export class SubcategoryService {
 
             const data = options.includeProductCount
                 ? (await this.attachAvailableProductCounts(rawData.map((doc) => doc.toObject()))) as unknown as (ISubcategory & { productCount: number })[]
-                : rawData;
+                : rawData.map((doc) => withSortedCustomFields(doc.toObject()) as ISubcategory);
 
             const totalPages = Math.ceil(total / limit);
 
@@ -109,14 +134,20 @@ export class SubcategoryService {
      */
     public async updateSubcategory(id: string, data: Partial<ISubcategory>): Promise<ISubcategory | null> {
         try {
-            const updatedSubcategory = await Subcategory.findByIdAndUpdate(id, data, { new: true })
+            const payload = data.customFieldDefinitions
+                ? {
+                    ...data,
+                    customFieldDefinitions: normalizeCustomFieldDefinitions(data.customFieldDefinitions),
+                }
+                : data;
+            const updatedSubcategory = await Subcategory.findByIdAndUpdate(id, payload, { new: true })
                 .populate(['media', { path: 'category', populate: 'media' }]);
             if (!updatedSubcategory) {
                 AppLogger.warn(`⚠️ Subcategory ${id} not found for update.`);
                 return null;
             }
             AppLogger.info(`✌️ Subcategory ${id} updated successfully.`);
-            return updatedSubcategory;
+            return withSortedCustomFields(updatedSubcategory.toObject()) as ISubcategory;
         } catch (error) {
             AppLogger.error(`❌ Error updating subcategory ${id}:`, error);
             throw error;
@@ -145,10 +176,11 @@ export class SubcategoryService {
      * Get a single subcategory by ID.
      */
     public async getSubcategoryById(id: string): Promise<ISubcategory | null> {
-        return Subcategory.findById(id).populate('media').populate({
+        const subcategory = await Subcategory.findById(id).populate('media').populate({
             path: 'category',
             select: 'name media',
             populate: { path: 'media' }
         });
+        return subcategory ? withSortedCustomFields(subcategory.toObject()) as ISubcategory : null;
     }
 }
