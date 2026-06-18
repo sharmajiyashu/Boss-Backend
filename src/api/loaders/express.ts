@@ -206,6 +206,12 @@ export default (app: Express): void => {
     const status = error.status || 500;
     const message = error.message || 'Internal server error';
 
+    AppLogger.error(`[Global Error Handler] ${message}`, {
+      stack: error.stack,
+      path: _req.path,
+      method: _req.method
+    });
+
     res.status(status).json({
       success: false,
       error: message

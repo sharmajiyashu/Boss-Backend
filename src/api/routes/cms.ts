@@ -141,6 +141,9 @@ export default (router: Router) => {
         </html>
       `);
     } catch (error: any) {
+      import('../loaders/logger').then(({ default: AppLogger }) => {
+        AppLogger.error(`[CMS Route Error] ${error.message}`, { stack: error.stack });
+      });
       return res.status(500).send('Internal Server Error');
     }
   };
