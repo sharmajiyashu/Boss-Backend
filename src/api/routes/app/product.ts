@@ -132,6 +132,25 @@ export default (router: Router) => {
     }
   );
 
+  // PUT /api/products/:id - Update an existing product listing
+  router.put('/products/:id',
+    appAuthMiddleware,
+    validate(updateProductSchema, 'body'),
+    async (req: Request, res: Response) => {
+      try {
+        const userId = (req as any).user.id;
+        const productId = req.params.id as string;
+        if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+          return ResponseWrapper.error(res, 'Invalid Product ID', 400);
+        }
+        const product = await productService.updateProduct(userId, productId, req.body);
+        return ResponseWrapper.success(res, product, 'Product updated successfully and moved to approval');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    }
+  );
+
   // POST /api/products/:id/images - Add existing images (IDs) to product
   router.post('/products/:id/images',
     appAuthMiddleware,

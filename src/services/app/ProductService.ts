@@ -194,26 +194,7 @@ export class ProductService {
     }
 
     if (data.id) {
-      // Update existing product
-      const product = await Product.findOne({ _id: data.id, seller: userId });
-      if (!product) {
-        throw new Error('Product not found or unauthorized');
-      }
-
-      if (data.location?.lat !== undefined && data.location?.lng !== undefined) {
-        data.geometry = {
-          type: 'Point',
-          coordinates: [Number(data.location.lng), Number(data.location.lat)]
-        };
-      }
-
-      Object.assign(product, {
-        ...data,
-        status: 'pending' // Reset to pending on update
-      });
-
-      await product.save();
-      return product;
+      return this.updateProduct(userId, data.id, data);
     } else {
       // Create new product
       if (data.location?.lat !== undefined && data.location?.lng !== undefined) {
@@ -232,6 +213,57 @@ export class ProductService {
       await product.save();
       return product;
     }
+  }
+
+  public async updateProduct(userId: string, productId: string, data: any) {
+    // 1. Validate custom fields if subcategory is provided
+    if (data.subcategory) {
+      const subcategory = await Subcategory.findById(data.subcategory);
+      if (subcategory && subcategory.customFieldDefinitions) {
+        const customFields = data.customFields || {};
+        for (const field of subcategory.customFieldDefinitions) {
+          const value = customFields[field.key];
+
+          // Check required
+          if (field.isRequired && (value === undefined || value === null || value === '')) {
+            throw new Error(`Custom field "${field.label}" is required.`);
+          }
+
+          // Basic type validation
+          if (value !== undefined && value !== null) {
+            if (field.fieldType === 'number' && isNaN(Number(value))) {
+              throw new Error(`Custom field "${field.label}" must be a number.`);
+            }
+            if (field.fieldType === 'boolean' && typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
+              throw new Error(`Custom field "${field.label}" must be a boolean.`);
+            }
+            if (field.fieldType === 'select' && field.options && !field.options.includes(value)) {
+              throw new Error(`Custom field "${field.label}" must be one of: ${field.options.join(', ')}.`);
+            }
+          }
+        }
+      }
+    }
+
+    const product = await Product.findOne({ _id: productId, seller: userId });
+    if (!product) {
+      throw new Error('Product not found or unauthorized');
+    }
+
+    if (data.location?.lat !== undefined && data.location?.lng !== undefined) {
+      data.geometry = {
+        type: 'Point',
+        coordinates: [Number(data.location.lng), Number(data.location.lat)]
+      };
+    }
+
+    Object.assign(product, {
+      ...data,
+      status: 'pending' // Reset to pending (approval) on any update/edit
+    });
+
+    await product.save();
+    return product;
   }
 
   public async listSellerProducts(userId: string, filters: IProductFilters): Promise<IPaginatedProducts> {
