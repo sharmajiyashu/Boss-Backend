@@ -1,6 +1,8 @@
 import { Service } from 'typedi';
 import Product from '../../models/Product';
 import { IProductFilters, IPaginatedProducts } from '../app/ProductService';
+import { NotificationService } from '../common/NotificationService';
+import Container from 'typedi';
 
 @Service()
 export class AdminProductService {
@@ -55,11 +57,41 @@ export class AdminProductService {
   }
 
   public async approveProduct(productId: string) {
-    return Product.findByIdAndUpdate(productId, { status: 'approved' }, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(productId, { status: 'approved' }, { new: true });
+    if (updatedProduct && updatedProduct.seller) {
+      try {
+        const notifService = Container.get(NotificationService);
+        await notifService.createNotification({
+          title: 'Product Approved',
+          message: `Your product "${updatedProduct.name}" has been approved.`,
+          recipient: updatedProduct.seller.toString(),
+          type: 'product_approved',
+          metadata: { productId }
+        });
+      } catch (err) {
+        // Silently catch notification errors
+      }
+    }
+    return updatedProduct;
   }
 
   public async rejectProduct(productId: string) {
-    return Product.findByIdAndUpdate(productId, { status: 'rejected' }, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(productId, { status: 'rejected' }, { new: true });
+    if (updatedProduct && updatedProduct.seller) {
+      try {
+        const notifService = Container.get(NotificationService);
+        await notifService.createNotification({
+          title: 'Product Rejected',
+          message: `Your product "${updatedProduct.name}" has been rejected.`,
+          recipient: updatedProduct.seller.toString(),
+          type: 'product_rejected',
+          metadata: { productId }
+        });
+      } catch (err) {
+        // Silently catch notification errors
+      }
+    }
+    return updatedProduct;
   }
 
   public async deleteProduct(productId: string): Promise<boolean> {

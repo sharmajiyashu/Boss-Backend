@@ -1,6 +1,8 @@
 import { Service } from 'typedi';
 import Product from '../../models/Product';
 import Subcategory from '../../models/Subcategory';
+import { NotificationService } from '../common/NotificationService';
+import Container from 'typedi';
 
 
 import User from '../../models/User';
@@ -211,6 +213,21 @@ export class ProductService {
       });
 
       await product.save();
+      
+      // Notify admin for approval
+      try {
+        const notifService = Container.get(NotificationService);
+        await notifService.createNotification({
+          title: 'Pending Product Approval',
+          message: `A product listing "${product.name}" has been created and is pending approval.`,
+          recipient: 'admin',
+          type: 'product_pending',
+          metadata: { productId: product._id.toString(), sellerId: userId }
+        });
+      } catch (err) {
+        // Silently ignore
+      }
+
       return product;
     }
   }
@@ -263,6 +280,21 @@ export class ProductService {
     });
 
     await product.save();
+
+    // Notify admin for approval
+    try {
+      const notifService = Container.get(NotificationService);
+      await notifService.createNotification({
+        title: 'Pending Product Approval',
+        message: `A product listing "${product.name}" has been updated and is pending approval.`,
+        recipient: 'admin',
+        type: 'product_pending',
+        metadata: { productId: product._id.toString(), sellerId: userId }
+      });
+    } catch (err) {
+      // Silently ignore
+    }
+
     return product;
   }
 

@@ -12,6 +12,7 @@ import state from './state';
 import city from './city';
 import country from './country';
 import call from './call';
+import notification from './notification';
 
 
 export default (router: Router): Router => {
@@ -27,5 +28,6 @@ export default (router: Router): Router => {
     city(router);
     country(router);
     call(router);
+    notification(router);
     return router;
 };

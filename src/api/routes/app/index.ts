@@ -12,6 +12,7 @@ import setting from './setting';
 import payment from './payment';
 import location from './location';
 import call from './call';
+import notification from './notification';
 
 
 export default (router: Router): Router => {
@@ -28,5 +29,6 @@ export default (router: Router): Router => {
   payment(router);
   location(router);
   call(router);
+  notification(router);
   return router;
 };
