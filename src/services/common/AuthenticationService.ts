@@ -35,10 +35,14 @@ export class AuthenticationService {
         return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
+    private getEmailQuery(email: string) {
+        return { $regex: new RegExp(`^${email.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') };
+    }
+
     async adminLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
-            email,
+            email: this.getEmailQuery(email),
             userRole: 'admin'
         }).populate('profileImage');
 
@@ -79,7 +83,7 @@ export class AuthenticationService {
             data.email = data.email.trim().toLowerCase();
         }
 
-        const orQuery: any[] = [{ email: data.email }];
+        const orQuery: any[] = [{ email: this.getEmailQuery(data.email) }];
         if (data.mobile) {
             orQuery.push({ mobile: data.mobile });
         }
@@ -89,7 +93,7 @@ export class AuthenticationService {
         });
 
         if (existingUser) {
-            if (existingUser.email === data.email) {
+            if (existingUser.email && existingUser.email.toLowerCase() === data.email.toLowerCase()) {
                 throw new Error('User with this email already exists');
             }
             throw new Error('User with this mobile already exists');
@@ -152,7 +156,7 @@ export class AuthenticationService {
     async userLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
-            email,
+            email: this.getEmailQuery(email),
             userRole: 'user'
         }).populate('profileImage');
 
@@ -181,7 +185,7 @@ export class AuthenticationService {
     async userVerifyEmail(email: string, otp: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
-            email,
+            email: this.getEmailQuery(email),
             otp,
             otpExpires: { $gt: new Date() }
         }).populate('profileImage');
@@ -255,7 +259,7 @@ export class AuthenticationService {
 
     async userForgotPassword(email: string): Promise<{ otp: string }> {
         email = email.trim().toLowerCase();
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: this.getEmailQuery(email) });
         if (!user) {
             throw new Error('User with this email does not exist');
         }
@@ -287,7 +291,7 @@ export class AuthenticationService {
             data.email = data.email.trim().toLowerCase();
         }
         const user = await User.findOne({
-            email: data.email,
+            email: this.getEmailQuery(data.email),
             otp: data.otp,
             otpExpires: { $gt: new Date() }
         });
@@ -328,7 +332,7 @@ export class AuthenticationService {
             throw new Error('Email or mobile is required');
         }
 
-        const query = data.email ? { email: data.email } : { mobile: data.mobile };
+        const query = data.email ? { email: this.getEmailQuery(data.email) } : { mobile: data.mobile };
         const user = await User.findOne(query);
 
         if (!user) {
