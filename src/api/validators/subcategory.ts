@@ -3,7 +3,7 @@ import { z } from 'zod';
 const fieldDefinitionSchema = z.object({
     label: z.string().trim().min(3),
     key: z.string().trim().min(3),
-    fieldType: z.enum(['text', 'number', 'boolean', 'date', 'select', 'textarea', 'checkbox', 'switch']),
+    fieldType: z.enum(['text', 'number', 'boolean', 'date', 'select', 'multiselect', 'textarea', 'checkbox', 'switch']),
     options: z.array(z.string()).optional(),
     isFilterable: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),
     isRequired: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),

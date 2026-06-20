@@ -175,7 +175,7 @@ export class ProductService {
           const value = customFields[field.key];
 
           // Check required
-          if (field.isRequired && (value === undefined || value === null || value === '')) {
+          if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
             throw new Error(`Custom field "${field.label}" is required.`);
           }
 
@@ -189,6 +189,14 @@ export class ProductService {
             }
             if (field.fieldType === 'select' && field.options && !field.options.includes(value)) {
               throw new Error(`Custom field "${field.label}" must be one of: ${field.options.join(', ')}.`);
+            }
+            if (field.fieldType === 'multiselect' && field.options) {
+              const values = Array.isArray(value) ? value : (value ? [value] : []);
+              for (const val of values) {
+                if (!field.options.includes(val)) {
+                  throw new Error(`Custom field "${field.label}" must contain options from: ${field.options.join(', ')}.`);
+                }
+              }
             }
           }
         }
@@ -213,7 +221,7 @@ export class ProductService {
       });
 
       await product.save();
-      
+
       // Notify admin for approval
       try {
         const notifService = Container.get(NotificationService);
@@ -242,7 +250,7 @@ export class ProductService {
           const value = customFields[field.key];
 
           // Check required
-          if (field.isRequired && (value === undefined || value === null || value === '')) {
+          if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
             throw new Error(`Custom field "${field.label}" is required.`);
           }
 
@@ -256,6 +264,14 @@ export class ProductService {
             }
             if (field.fieldType === 'select' && field.options && !field.options.includes(value)) {
               throw new Error(`Custom field "${field.label}" must be one of: ${field.options.join(', ')}.`);
+            }
+            if (field.fieldType === 'multiselect' && field.options) {
+              const values = Array.isArray(value) ? value : (value ? [value] : []);
+              for (const val of values) {
+                if (!field.options.includes(val)) {
+                  throw new Error(`Custom field "${field.label}" must contain options from: ${field.options.join(', ')}.`);
+                }
+              }
             }
           }
         }

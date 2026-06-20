@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IFieldDefinition {
   label: string;
   key: string;
-  fieldType: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'textarea' | 'checkbox' | 'switch';
+  fieldType: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'textarea' | 'checkbox' | 'switch';
   options?: string[];
   isFilterable: boolean;
   isRequired: boolean;
@@ -25,7 +25,7 @@ const FieldDefinitionSchema: Schema = new Schema({
   key: { type: String, required: true },
   fieldType: {
     type: String,
-    enum: ['text', 'number', 'boolean', 'date', 'select', 'textarea', 'checkbox', 'switch'],
+    enum: ['text', 'number', 'boolean', 'date', 'select', 'multiselect', 'textarea', 'checkbox', 'switch'],
     default: 'text'
   },
   options: [{ type: String }],
