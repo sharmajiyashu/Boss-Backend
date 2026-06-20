@@ -46,6 +46,9 @@ export class ProductService {
       lat,
       lng,
       radius,
+      city,
+      minPrice,
+      maxPrice,
       addressId: _addressId,
       saveToAddresses: _saveToAddresses,
       label: _label,
@@ -66,9 +69,9 @@ export class ProductService {
       query.name = { $regex: search, $options: 'i' };
     }
 
+    let isSortingByDistance = false;
     let searchLat: number | undefined;
     let searchLng: number | undefined;
-    let usedSavedUserLocation = false;
 
     if (lat !== undefined && lng !== undefined) {
       searchLat = Number(lat);
@@ -78,23 +81,47 @@ export class ProductService {
       if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
         searchLat = user.location.lat;
         searchLng = user.location.lng;
-        usedSavedUserLocation = true;
       }
     }
 
-    let searchRadiusKm = radius !== undefined ? Number(radius) : undefined;
-    if (searchRadiusKm === undefined && usedSavedUserLocation) {
-      searchRadiusKm = 50;
+    if (searchLat !== undefined && searchLng !== undefined) {
+      isSortingByDistance = true;
+      const searchRadiusKm = radius !== undefined ? Number(radius) : undefined;
+      
+      if (searchRadiusKm !== undefined && searchRadiusKm > 0) {
+        const radiusInMeters = searchRadiusKm * 1000;
+        query.geometry = {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [searchLng, searchLat]
+            },
+            $maxDistance: radiusInMeters
+          }
+        };
+      } else {
+        query.geometry = {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [searchLng, searchLat]
+            }
+          }
+        };
+      }
     }
 
-    if (searchLat !== undefined && searchLng !== undefined && searchRadiusKm !== undefined && searchRadiusKm > 0) {
-      const radiusInKm = searchRadiusKm;
-      if (radiusInKm > 0) {
-        query.geometry = {
-          $geoWithin: {
-            $centerSphere: [[Number(searchLng), Number(searchLat)], radiusInKm / 6378.1], // 6378.1 is Earth's radius in km
-          },
-        };
+    if (city) {
+      query['location.city'] = { $regex: city, $options: 'i' };
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      query.price = {};
+      if (minPrice !== undefined) {
+        query.price.$gte = Number(minPrice);
+      }
+      if (maxPrice !== undefined) {
+        query.price.$lte = Number(maxPrice);
       }
     }
 
@@ -102,7 +129,7 @@ export class ProductService {
     // These are any other query parameters passed in the filters object
     if (Object.keys(customFilters).length > 0) {
       for (const key in customFilters) {
-        if (customFilters[key]) {
+        if (customFilters[key] !== undefined && customFilters[key] !== null && customFilters[key] !== '') {
           // If value is a string, handle multi-value or simple regex
           // Otherwise use exact match
           query[`customFields.${key}`] = customFilters[key];
@@ -110,26 +137,48 @@ export class ProductService {
       }
     }
 
+    // Prepare query for countDocuments, replacing/removing $near to avoid MongoDB driver errors
+    const countQuery = { ...query };
+    if (countQuery.geometry && countQuery.geometry.$near) {
+      if (countQuery.geometry.$near.$maxDistance) {
+        const maxDistanceMeters = countQuery.geometry.$near.$maxDistance;
+        const radiusInKm = maxDistanceMeters / 1000;
+        countQuery.geometry = {
+          $geoWithin: {
+            $centerSphere: [
+              countQuery.geometry.$near.$geometry.coordinates,
+              radiusInKm / 6378.1
+            ]
+          }
+        };
+      } else {
+        delete countQuery.geometry;
+      }
+    }
+
+    let mongooseQuery = Product.find(query)
+      .populate({
+        path: 'category',
+        populate: { path: 'media' }
+      })
+      .populate({
+        path: 'subcategory',
+        populate: { path: 'media' }
+      })
+      .populate({
+        path: 'seller',
+        select: 'firstName lastName email profileImage location',
+        populate: { path: 'profileImage' }
+      })
+      .populate('media');
+
+    if (!isSortingByDistance) {
+      mongooseQuery = mongooseQuery.sort({ createdAt: -1 });
+    }
+
     const [products, total] = await Promise.all([
-      Product.find(query)
-        .populate({
-          path: 'category',
-          populate: { path: 'media' }
-        })
-        .populate({
-          path: 'subcategory',
-          populate: { path: 'media' }
-        })
-        .populate({
-          path: 'seller',
-          select: 'firstName lastName email profileImage location',
-          populate: { path: 'profileImage' }
-        })
-        .populate('media')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Product.countDocuments(query)
+      mongooseQuery.skip(skip).limit(limit),
+      Product.countDocuments(countQuery)
     ]);
 
     return {

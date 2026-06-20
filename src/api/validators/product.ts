@@ -49,4 +49,7 @@ export const getProductQuerySchema = z.object({
     lat: z.coerce.number().optional(),
     lng: z.coerce.number().optional(),
     radius: z.coerce.number().optional(),
+    city: z.string().optional(),
+    minPrice: z.coerce.number().min(0).optional(),
+    maxPrice: z.coerce.number().min(0).optional(),
 }).passthrough();
