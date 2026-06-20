@@ -25,7 +25,7 @@ export const userRegisterSchema = z.object({
     firstName: z.string().min(2, "First name too short"),
     lastName: z.string().min(2, "Last name too short"),
     email: z.string().email("Invalid email address"),
-    mobile: z.string().length(10, "Mobile number must be 10 digits").regex(/^\d+$/, "Mobile number must contain only digits"),
+    mobile: z.string().length(10, "Mobile number must be 10 digits").regex(/^\d+$/, "Mobile number must contain only digits").optional(),
     password: z.string().min(6, "Password must be at least 6 characters").optional(),
     location: z.object({
         lat: z.number().optional(),

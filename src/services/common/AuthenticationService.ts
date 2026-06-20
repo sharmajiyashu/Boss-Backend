@@ -36,6 +36,7 @@ export class AuthenticationService {
     }
 
     async adminLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
+        email = email.trim().toLowerCase();
         const user = await User.findOne({
             email,
             userRole: 'admin'
@@ -63,7 +64,7 @@ export class AuthenticationService {
         firstName: string;
         lastName: string;
         email: string;
-        mobile: string;
+        mobile?: string;
         password?: string;
         location?: {
             lat?: number;
@@ -74,12 +75,24 @@ export class AuthenticationService {
             zipcode?: string;
         }
     }): Promise<{ token: string; user: IUser }> {
+        if (data.email) {
+            data.email = data.email.trim().toLowerCase();
+        }
+
+        const orQuery: any[] = [{ email: data.email }];
+        if (data.mobile) {
+            orQuery.push({ mobile: data.mobile });
+        }
+
         const existingUser = await User.findOne({
-            $or: [{ email: data.email }, { mobile: data.mobile }]
+            $or: orQuery
         });
 
         if (existingUser) {
-            throw new Error('User with this email or mobile already exists');
+            if (existingUser.email === data.email) {
+                throw new Error('User with this email already exists');
+            }
+            throw new Error('User with this mobile already exists');
         }
 
         const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : undefined;
@@ -137,6 +150,7 @@ export class AuthenticationService {
     }
 
     async userLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
+        email = email.trim().toLowerCase();
         const user = await User.findOne({
             email,
             userRole: 'user'
@@ -165,6 +179,7 @@ export class AuthenticationService {
     }
 
     async userVerifyEmail(email: string, otp: string): Promise<{ token: string; user: IUser }> {
+        email = email.trim().toLowerCase();
         const user = await User.findOne({
             email,
             otp,
@@ -239,6 +254,7 @@ export class AuthenticationService {
     }
 
     async userForgotPassword(email: string): Promise<{ otp: string }> {
+        email = email.trim().toLowerCase();
         const user = await User.findOne({ email });
         if (!user) {
             throw new Error('User with this email does not exist');
@@ -267,6 +283,9 @@ export class AuthenticationService {
     }
 
     async userResetPassword(data: { email: string; otp: string; newPassword: string }): Promise<void> {
+        if (data.email) {
+            data.email = data.email.trim().toLowerCase();
+        }
         const user = await User.findOne({
             email: data.email,
             otp: data.otp,
@@ -302,6 +321,9 @@ export class AuthenticationService {
     }
 
     async resendOtp(data: { email?: string; mobile?: string }): Promise<void> {
+        if (data.email) {
+            data.email = data.email.trim().toLowerCase();
+        }
         if (!data.email && !data.mobile) {
             throw new Error('Email or mobile is required');
         }
