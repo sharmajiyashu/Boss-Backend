@@ -57,11 +57,11 @@ export class ProductService {
 
     const query: any = { status: status || 'approved' }; // Default to approved for public, but allow status filter
 
-    if (categoryId) {
+    if (categoryId && categoryId !== '') {
       query.category = categoryId;
     }
 
-    if (subcategoryId) {
+    if (subcategoryId && subcategoryId !== '') {
       query.subcategory = subcategoryId;
     }
 
@@ -73,41 +73,45 @@ export class ProductService {
     let searchLat: number | undefined;
     let searchLng: number | undefined;
 
-    if (lat !== undefined && lng !== undefined) {
-      searchLat = Number(lat);
-      searchLng = Number(lng);
-    } else if (userId) {
-      const user = await User.findById(userId).select('location');
-      if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
-        searchLat = user.location.lat;
-        searchLng = user.location.lng;
-      }
-    }
+    const searchRadiusKm = radius !== undefined && radius !== null && (radius as any) !== '' ? Number(radius) : undefined;
 
-    if (searchLat !== undefined && searchLng !== undefined) {
-      isSortingByDistance = true;
-      const searchRadiusKm = radius !== undefined ? Number(radius) : undefined;
-      
-      if (searchRadiusKm !== undefined && searchRadiusKm > 0) {
-        const radiusInMeters = searchRadiusKm * 1000;
-        query.geometry = {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [searchLng, searchLat]
-            },
-            $maxDistance: radiusInMeters
-          }
-        };
-      } else {
-        query.geometry = {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [searchLng, searchLat]
+    // Remove radius filters that are 0 or negative.
+    // If radius is 0 or negative, we do NOT make coordinates query ($near geometry query).
+    if (searchRadiusKm === undefined || searchRadiusKm > 0) {
+      if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
+        searchLat = Number(lat);
+        searchLng = Number(lng);
+      } else if (userId) {
+        const user = await User.findById(userId).select('location');
+        if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
+          searchLat = user.location.lat;
+          searchLng = user.location.lng;
+        }
+      }
+
+      if (searchLat !== undefined && searchLng !== undefined) {
+        isSortingByDistance = true;
+        if (searchRadiusKm !== undefined && searchRadiusKm > 0) {
+          const radiusInMeters = searchRadiusKm * 1000;
+          query.geometry = {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [searchLng, searchLat]
+              },
+              $maxDistance: radiusInMeters
             }
-          }
-        };
+          };
+        } else {
+          query.geometry = {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [searchLng, searchLat]
+              }
+            }
+          };
+        }
       }
     }
 
@@ -115,12 +119,13 @@ export class ProductService {
       query['location.city'] = { $regex: city, $options: 'i' };
     }
 
-    if (minPrice !== undefined || maxPrice !== undefined) {
+    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || 
+        (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
       query.price = {};
-      if (minPrice !== undefined) {
+      if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
         query.price.$gte = Number(minPrice);
       }
-      if (maxPrice !== undefined) {
+      if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
         query.price.$lte = Number(maxPrice);
       }
     }
