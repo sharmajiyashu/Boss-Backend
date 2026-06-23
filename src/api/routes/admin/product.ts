@@ -10,7 +10,7 @@ export default (router: Router) => {
   const adminProductService = Container.get(AdminProductService);
 
   // GET /api/admin/products - Get all products (all statuses) with filters and pagination
-  router.get('/admin/products',
+  router.get('/products',
     adminAuthMiddleware,
     validate(getProductQuerySchema, 'query'),
     async (req: Request, res: Response) => {
@@ -24,7 +24,7 @@ export default (router: Router) => {
     });
 
   // PATCH /api/admin/products/:id/approve - Approve a product
-  router.patch('/admin/products/:id/approve',
+  router.patch('/products/:id/approve',
     adminAuthMiddleware,
     async (req: Request, res: Response) => {
       try {
@@ -38,7 +38,7 @@ export default (router: Router) => {
     });
 
   // PATCH /api/admin/products/:id/reject - Reject a product
-  router.patch('/admin/products/:id/reject',
+  router.patch('/products/:id/reject',
     adminAuthMiddleware,
     async (req: Request, res: Response) => {
       try {
@@ -52,7 +52,7 @@ export default (router: Router) => {
     });
 
   // DELETE /api/admin/admin/products - Delete all products
-  router.delete('/admin/products',
+  router.delete('/products',
     adminAuthMiddleware,
     async (req: Request, res: Response) => {
       try {
@@ -64,7 +64,7 @@ export default (router: Router) => {
     });
 
   // DELETE /api/admin/products/:id - Delete a product
-  router.delete('/admin/products/:id',
+  router.delete('/products/:id',
     adminAuthMiddleware,
     async (req: Request, res: Response) => {
       try {
@@ -78,7 +78,7 @@ export default (router: Router) => {
     });
 
   // PUT /api/admin/products/:id - Edit a product
-  router.put('/admin/products/:id',
+  router.put('/products/:id',
     adminAuthMiddleware,
     validate(updateProductSchema, 'body'),
     async (req: Request, res: Response) => {

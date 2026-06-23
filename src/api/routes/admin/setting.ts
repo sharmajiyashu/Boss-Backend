@@ -6,7 +6,7 @@ import { ResponseWrapper } from '../../responseWrapper';
 export default (router: Router) => {
   const settingService = Container.get(AppSettingService);
 
-  router.get('/admin/settings',
+  router.get('/settings',
     async (req: Request, res: Response) => {
       try {
         const settings = await settingService.getSettings();
@@ -16,7 +16,7 @@ export default (router: Router) => {
       }
     });
 
-  router.patch('/admin/settings',
+  router.patch('/settings',
     async (req: Request, res: Response) => {
       try {
         const settings = await settingService.updateSettings(req.body);
