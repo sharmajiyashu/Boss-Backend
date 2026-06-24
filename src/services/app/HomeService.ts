@@ -6,7 +6,7 @@ import { SubcategoryService } from '../admin/SubcategoryService';
 
 @Service()
 export class HomeService {
-  constructor(private subcategoryService: SubcategoryService) {}
+  constructor(private subcategoryService: SubcategoryService) { }
 
   public async getHomeData(userId?: string) {
     // 1. Fetch categories with media
@@ -29,13 +29,15 @@ export class HomeService {
         createdAt: sub.createdAt,
         updatedAt: sub.updatedAt,
         subcategories: [],
-        productCount: (sub as any).productCount || 0
+        productCount: (sub as any).productCount || 0,
+        isMainSubcategory: true
       }));
 
     // Attach subcategories to categories
     const categoriesWithSubcategories = categories.map(category => ({
       ...category,
-      subcategories: subcategories.filter(sub => sub.category && sub.category.toString() === category._id.toString())
+      subcategories: subcategories.filter(sub => sub.category && sub.category.toString() === category._id.toString()),
+      isMainSubcategory: false
     }));
 
     const allCategories = [...categoriesWithSubcategories, ...parentlessCategories];
