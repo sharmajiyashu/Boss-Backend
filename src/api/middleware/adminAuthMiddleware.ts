@@ -23,7 +23,7 @@ export const adminAuthMiddleware = async (req: Request, res: Response, next: Nex
             return next(new UnauthorizedError(new Error('Invalid authorization type')));
         }
 
-        if (_.isEmpty(accessToken)) {
+        if (_.isEmpty(accessToken) || accessToken === 'undefined' || accessToken === 'null') {
             return next(new UnauthorizedError(new Error('Access token missing')));
         }
 
