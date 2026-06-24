@@ -25,8 +25,8 @@ export default (router: Router) => {
         validate(verifyEmailSchema, 'body'),
         async (req: Request, res: Response) => {
             try {
-                const { email, otp } = req.body;
-                const result = await authService.userVerifyEmail(email, otp);
+                const { email, otp, fcmToken, deviceType } = req.body;
+                const result = await authService.userVerifyEmail(email, otp, fcmToken, deviceType);
                 return ResponseWrapper.success(res, result, 'Email verified successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error);
@@ -38,8 +38,8 @@ export default (router: Router) => {
         validate(userLoginSchema, 'body'),
         async (req: Request, res: Response) => {
             try {
-                const { email, password } = req.body;
-                const result = await authService.userLogin(email, password);
+                const { email, password, fcmToken, deviceType } = req.body;
+                const result = await authService.userLogin(email, password, fcmToken, deviceType);
                 return ResponseWrapper.success(res, result, 'User logged in successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error);
@@ -63,9 +63,9 @@ export default (router: Router) => {
         validate(verifyOtpSchema, 'body'),
         async (req: Request, res: Response) => {
             try {
-                const { extension, mobile, otp } = req.body;
+                const { extension, mobile, otp, fcmToken, deviceType } = req.body;
                 const fullMobile = `${extension}${mobile}`;
-                const result = await authService.userVerifyOTP(fullMobile, otp);
+                const result = await authService.userVerifyOTP(fullMobile, otp, fcmToken, deviceType);
                 return ResponseWrapper.success(res, result, 'OTP verified successfully');
             } catch (error: any) {
                 return ResponseWrapper.error(res, error);

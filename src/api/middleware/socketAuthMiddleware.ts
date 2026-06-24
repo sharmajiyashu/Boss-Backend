@@ -27,13 +27,13 @@ export default async (socket: AuthenticatedSocket, next: (err?: Error) => void) 
         if (!user) {
             return next(new Error('Invalid authentication token'));
         }
-        // socket.userId = user.id;
-        // socket.user = {
-        //     id: user.id,
-        //     email: user.email,
-        //     fullName: user.fullName || '',
-        //     profileImage: user.profileImage || ''
-        // };
+        socket.userId = user.id || user._id.toString();
+        socket.user = {
+            id: user.id || user._id.toString(),
+            email: user.email || '',
+            fullName: `${user.firstName} ${user.lastName}`.trim(),
+            profileImage: user.profileImage ? user.profileImage.toString() : ''
+        };
         AppLogger.info(`Socket authenticated for user: ${user.id}`);
         next();
     } catch (error) {

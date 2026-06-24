@@ -10,8 +10,8 @@ export default (router: Router) => {
 
     router.post('/login', validate(adminLoginSchema), async (req: Request, res: Response) => {
         try {
-            const { email, password } = req.body;
-            const result = await authService.adminLogin(email, password);
+            const { email, password, fcmToken, deviceType } = req.body;
+            const result = await authService.adminLogin(email, password, fcmToken, deviceType);
             return ResponseWrapper.success(res, result, 'Admin logged in successfully');
         } catch (error: any) {
             return ResponseWrapper.error(res, error.message);

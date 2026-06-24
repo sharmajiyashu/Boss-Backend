@@ -1,30 +1,16 @@
 import { Service } from 'typedi';
 import mongoose from 'mongoose';
 import Chat, { IChat } from '../../models/Chat';
-
-type ChatListLean = {
-    _id: mongoose.Types.ObjectId;
-    participants: mongoose.Types.ObjectId[];
-    reads: IChat['reads'];
-    lastMessage?: mongoose.Types.ObjectId | null;
-    [key: string]: unknown;
-};
-import Message from '../../models/ChatMessage';
+import Message, { IChatMessage } from '../../models/ChatMessage';
 import User from '../../models/User';
-import Media from '../../models/Media';
 import { FirebasePushService } from '../common/FirebasePushService';
+
+export function buildDeterministicRoomId(userIdA: string, userIdB: string): string {
+    return [userIdA, userIdB].sort().join('_');
+}
 
 export function buildParticipantKey(userIdA: string, userIdB: string): string {
     return [userIdA, userIdB].sort().join('::');
-}
-
-function senderIdOf(message: { sender: unknown }): string {
-    const s = message.sender as { _id?: mongoose.Types.ObjectId } | mongoose.Types.ObjectId | string | undefined;
-    if (s && typeof s === 'object' && '_id' in s && s._id) return s._id.toString();
-    if (s && typeof s === 'object' && typeof (s as mongoose.Types.ObjectId).toString === 'function') {
-        return (s as mongoose.Types.ObjectId).toString();
-    }
-    return String(s);
 }
 
 @Service()
@@ -46,75 +32,49 @@ export class ChatService {
         }
     }
 
-    private getReadAt(chat: { reads?: { user: mongoose.Types.ObjectId; lastReadAt: Date }[] }, uid: string): Date {
-        const r = chat.reads?.find((x) => x.user.toString() === uid);
-        return r?.lastReadAt ?? new Date(0);
-    }
-
-    private async unreadCountForChat(chatId: mongoose.Types.ObjectId, userId: string, reads: IChat['reads']): Promise<number> {
-        const lastRead = this.getReadAt({ reads }, userId);
-        return Message.countDocuments({
-            chat: chatId,
-            sender: { $ne: new mongoose.Types.ObjectId(userId) },
-            createdAt: { $gt: lastRead },
-        });
-    }
-
-    private isOutgoingSeenByOther(
-        lastMessage: { sender?: unknown; createdAt?: Date } | null,
-        userId: string,
-        participants: mongoose.Types.ObjectId[],
-        reads: IChat['reads']
-    ): boolean | null {
-        if (!lastMessage?.createdAt) return null;
-        if (senderIdOf(lastMessage as { sender: unknown }) !== userId) return null;
-        const otherId = participants.map((p) => p.toString()).find((id) => id !== userId);
-        if (!otherId) return null;
-        const otherRead = this.getReadAt({ reads }, otherId);
-        return new Date(lastMessage.createdAt) <= otherRead;
-    }
-
     public async getOrCreateDirectChat(userId: string, participantId: string) {
         await this.assertCanChat(userId, participantId);
+        const roomId = buildDeterministicRoomId(userId, participantId);
         const key = buildParticipantKey(userId, participantId);
-        let chat = await Chat.findOne({ participantKey: key });
+
+        let chat = await Chat.findOne({ id: roomId });
         if (!chat) {
+            const [me, other] = await Promise.all([
+                User.findById(userId).select('firstName lastName profileImage').populate('profileImage').lean(),
+                User.findById(participantId).select('firstName lastName profileImage').populate('profileImage').lean(),
+            ]);
+
+            const details = new Map();
+            details.set(userId, {
+                name: `${me?.firstName || ''} ${me?.lastName || ''}`.trim() || 'User',
+                image: (me?.profileImage as any)?.url || '',
+            });
+            details.set(participantId, {
+                name: `${other?.firstName || ''} ${other?.lastName || ''}`.trim() || 'User',
+                image: (other?.profileImage as any)?.url || '',
+            });
+
+            const unread = new Map();
+            unread.set(userId, 0);
+            unread.set(participantId, 0);
+
             chat = await Chat.create({
+                id: roomId,
                 participantKey: key,
                 participants: [
                     new mongoose.Types.ObjectId(userId),
                     new mongoose.Types.ObjectId(participantId),
                 ],
+                participantDetails: details,
+                unreadCounts: unread,
                 reads: [
-                    { user: new mongoose.Types.ObjectId(userId), lastReadAt: new Date(0) },
+                    { user: new mongoose.Types.ObjectId(userId), lastReadAt: new Date() },
                     { user: new mongoose.Types.ObjectId(participantId), lastReadAt: new Date(0) },
                 ],
                 lastMessagePreview: '',
             });
         }
-        return this.chatDetailForList(chat.toObject() as unknown as ChatListLean, userId);
-    }
-
-    private async chatDetailForList(c: ChatListLean, userId: string) {
-        const otherId = c.participants.map((p) => p.toString()).find((id) => id !== userId);
-        const [otherUser, unread, lastMsgDoc] = await Promise.all([
-            otherId
-                ? User.findById(otherId).select('firstName lastName profileImage').populate('profileImage').lean()
-                : null,
-            this.unreadCountForChat(c._id, userId, c.reads),
-            c.lastMessage
-                ? Message.findById(c.lastMessage as mongoose.Types.ObjectId)
-                    .select('sender createdAt')
-                    .lean()
-                : null,
-        ]);
-        const seen = this.isOutgoingSeenByOther(lastMsgDoc, userId, c.participants, c.reads);
-        return {
-            ...c,
-            otherUser,
-            unreadCount: unread,
-            isLastMessageSeenByOther: seen,
-        };
+        return chat;
     }
 
     public async listChats(userId: string, page: number, limit: number) {
@@ -122,17 +82,15 @@ export class ChatService {
         const uidObj = new mongoose.Types.ObjectId(userId);
         const [chats, total] = await Promise.all([
             Chat.find({ participants: uidObj })
-                .sort({ lastMessageAt: -1, updatedAt: -1 })
+                .sort({ updatedAt: -1 })
                 .skip(skip)
                 .limit(limit)
                 .lean(),
             Chat.countDocuments({ participants: uidObj }),
         ]);
 
-        const enriched = await Promise.all(chats.map((c) => this.chatDetailForList(c as ChatListLean, userId)));
-
         return {
-            chats: enriched,
+            chats,
             total,
             page,
             limit,
@@ -141,41 +99,27 @@ export class ChatService {
     }
 
     public async getMessages(chatId: string, userId: string, page: number, limit: number) {
-        const chat = await Chat.findById(chatId).lean();
+        const chat = await Chat.findOne({ id: chatId }).lean();
         if (!chat || !chat.participants.some((p) => p.toString() === userId)) {
             throw new Error('Chat not found');
         }
         const skip = (page - 1) * limit;
         const [messages, total] = await Promise.all([
-            Message.find({ chat: chat._id })
+            Message.find({ chatId })
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .populate('media')
                 .populate({
                     path: 'sender',
                     select: 'firstName lastName profileImage',
                     populate: { path: 'profileImage' },
                 })
                 .lean(),
-            Message.countDocuments({ chat: chat._id }),
+            Message.countDocuments({ chatId }),
         ]);
 
-        const withSeen = messages.map((m) => {
-            const isMine = senderIdOf(m) === userId;
-            let seenByOther: boolean | undefined;
-            if (isMine) {
-                const otherId = chat.participants.map((p) => p.toString()).find((id) => id !== userId);
-                if (otherId) {
-                    const otherRead = this.getReadAt(chat, otherId);
-                    seenByOther = new Date(m.createdAt) <= otherRead;
-                }
-            }
-            return { ...m, seenByOther: isMine ? seenByOther : undefined };
-        });
-
         return {
-            messages: withSeen.reverse(),
+            messages: messages.reverse(),
             total,
             page,
             limit,
@@ -183,38 +127,52 @@ export class ChatService {
         };
     }
 
-    public async sendMessage(chatId: string, userId: string, input: { text?: string; mediaIds?: string[] }) {
-        const chat = await Chat.findById(chatId);
+    public async saveNewMessage(chatId: string, userId: string, payload: any) {
+        const chat = await Chat.findOne({ id: chatId });
         if (!chat || !chat.participants.some((p) => p.toString() === userId)) {
             throw new Error('Chat not found');
         }
 
-        const text = input.text?.trim();
-        const mediaIds = input.mediaIds ?? [];
-        if (!text && mediaIds.length === 0) {
-            throw new Error('Message must include text or at least one image');
-        }
+        const text = payload.text?.trim() || '';
+        const media = payload.media || [];
+        const chat_type = payload.chat_type || 'text';
 
-        if (mediaIds.length > 0) {
-            const count = await Media.countDocuments({
-                _id: { $in: mediaIds.map((id) => new mongoose.Types.ObjectId(id)) },
-            });
-            if (count !== mediaIds.length) throw new Error('Invalid media reference');
-        }
-
-        const preview = text?.slice(0, 120) ?? (mediaIds.length ? `[${mediaIds.length} image(s)]` : '');
-
-        const message = await Message.create({
+        const messageData: any = {
             chat: chat._id,
+            chatId: chat.id,
             sender: new mongoose.Types.ObjectId(userId),
-            text: text || undefined,
-            media: mediaIds.map((id) => new mongoose.Types.ObjectId(id)),
-        });
+            text,
+            media,
+            chat_type,
+            productData: payload.productData,
+            status: payload.status,
+            stataus: payload.stataus || payload.status,
+            requestId: payload.requestId,
+            scheduledAtStr: payload.scheduledAtStr,
+            scheduledTime: payload.scheduledTime ? new Date(payload.scheduledTime) : undefined,
+            scheduledCallId: payload.scheduledCallId ? new mongoose.Types.ObjectId(payload.scheduledCallId) : undefined,
+            scheduledBy: payload.scheduledBy ? new mongoose.Types.ObjectId(payload.scheduledBy) : undefined,
+        };
 
-        const now = message.createdAt ?? new Date();
+        const message = new Message(messageData);
+        if (chat_type === 'call_request') {
+            message.requestId = message._id.toString();
+        }
+
+        await message.save();
+
+        const now = message.createdAt || new Date();
         chat.lastMessage = message._id as mongoose.Types.ObjectId;
         chat.lastMessageAt = now;
-        chat.lastMessagePreview = preview;
+        chat.lastMessagePreview = text || (media.length ? `[${media.length} image(s)]` : '');
+        chat.lastMessageSenderId = userId;
+
+        // Increment target participant's unread count
+        const targetUserId = chat.participants.map((p) => p.toString()).find((id) => id !== userId);
+        if (targetUserId) {
+            const currentCount = chat.unreadCounts.get(targetUserId) || 0;
+            chat.unreadCounts.set(targetUserId, currentCount + 1);
+        }
 
         const rIdx = chat.reads.findIndex((x) => x.user.toString() === userId);
         if (rIdx >= 0) chat.reads[rIdx].lastReadAt = now;
@@ -223,7 +181,6 @@ export class ChatService {
         await chat.save();
 
         const populated = await Message.findById(message._id)
-            .populate('media')
             .populate({
                 path: 'sender',
                 select: 'firstName lastName profileImage',
@@ -231,35 +188,78 @@ export class ChatService {
             })
             .lean();
 
-        const recipientId = chat.participants.map((p) => p.toString()).find((id) => id !== userId);
-        if (recipientId) {
-            const sender = await User.findById(userId).select('firstName lastName').lean();
-            const name = sender ? `${sender.firstName} ${sender.lastName}`.trim() : 'Someone';
-            await this.firebasePush.notifyUser(recipientId, {
+        // Trigger FCM push notification to other user
+        if (targetUserId) {
+            const senderDetails = chat.participantDetails.get(userId);
+            const name = senderDetails?.name || 'Someone';
+            await this.firebasePush.notifyUser(targetUserId, {
                 title: name,
                 body: text || 'Sent a photo',
                 data: {
                     type: 'chat_message',
-                    chatId: String(chat._id),
+                    chatId: chat.id,
                     messageId: String(message._id),
                     senderId: userId,
                 },
             });
         }
 
-        return populated;
+        return { message: populated, chat };
     }
 
-    public async markChatRead(chatId: string, userId: string) {
-        const chat = await Chat.findById(chatId);
+    public async markMessagesAsRead(chatId: string, userId: string) {
+        const chat = await Chat.findOne({ id: chatId });
         if (!chat || !chat.participants.some((p) => p.toString() === userId)) {
             throw new Error('Chat not found');
         }
+
+        chat.unreadCounts.set(userId, 0);
         const now = new Date();
         const idx = chat.reads.findIndex((x) => x.user.toString() === userId);
         if (idx >= 0) chat.reads[idx].lastReadAt = now;
         else chat.reads.push({ user: new mongoose.Types.ObjectId(userId), lastReadAt: now });
+
         await chat.save();
-        return { ok: true, lastReadAt: now };
+
+        // Update seenAt for messages in room sent by other user
+        await Message.updateMany(
+            { chatId, sender: { $ne: new mongoose.Types.ObjectId(userId) }, seenAt: null },
+            { $set: { seenAt: now } }
+        );
+
+        return chat;
+    }
+
+    public async updateMessageStatus(chatId: string, messageId: string, status: string) {
+        const message = await Message.findOne({ _id: messageId, chatId });
+        if (!message) {
+            throw new Error('Message not found');
+        }
+
+        message.status = status;
+        message.stataus = status; // Backward compatibility
+        await message.save();
+
+        return message;
+    }
+
+    public async sendMessage(chatId: string, userId: string, input: { text?: string; mediaIds?: string[] }) {
+        const mediaUrls: { url: string }[] = [];
+        if (input.mediaIds && input.mediaIds.length > 0) {
+            const mediaDocs = await mongoose.model('Media').find({
+                _id: { $in: input.mediaIds.map((id) => new mongoose.Types.ObjectId(id)) }
+            }).select('url').lean();
+            mediaUrls.push(...mediaDocs.map((m: any) => ({ url: m.url })));
+        }
+        const result = await this.saveNewMessage(chatId, userId, {
+            text: input.text,
+            media: mediaUrls
+        });
+        return result.message;
+    }
+
+    public async markChatRead(chatId: string, userId: string) {
+        await this.markMessagesAsRead(chatId, userId);
+        return { ok: true };
     }
 }

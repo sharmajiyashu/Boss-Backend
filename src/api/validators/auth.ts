@@ -9,16 +9,22 @@ export const verifyOtpSchema = z.object({
     extension: z.string().regex(/^\d{1,4}$/, "Invalid extension (e.g. 91)"),
     mobile: z.string().length(10, "Mobile number must be 10 digits").regex(/^\d+$/, "Mobile number must contain only digits"),
     otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d+$/, "OTP must contain only digits"),
+    fcmToken: z.string().optional(),
+    deviceType: z.string().optional(),
 });
 
 export const adminLoginSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
+    fcmToken: z.string().optional(),
+    deviceType: z.string().optional(),
 });
 
 export const userLoginSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
+    fcmToken: z.string().optional(),
+    deviceType: z.string().optional(),
 });
 
 export const userRegisterSchema = z.object({
@@ -50,6 +56,8 @@ export const resetPasswordSchema = z.object({
 export const verifyEmailSchema = z.object({
     email: z.string().email("Invalid email address"),
     otp: z.string().length(6, "OTP must be 6 digits"),
+    fcmToken: z.string().optional(),
+    deviceType: z.string().optional(),
 });
 
 export const resendOtpSchema = z.object({

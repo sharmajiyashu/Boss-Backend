@@ -39,7 +39,7 @@ export class AuthenticationService {
         return { $regex: new RegExp(`^${email.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') };
     }
 
-    async adminLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
+    async adminLogin(email: string, password: string, fcmToken?: string, deviceType?: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
             email: this.getEmailQuery(email),
@@ -60,6 +60,10 @@ export class AuthenticationService {
         // Update last login
         user.lastLoginAt = new Date();
         await user.save();
+
+        if (fcmToken) {
+            await this.saveFcmToken(user._id.toString(), fcmToken, deviceType);
+        }
 
         return { token, user };
     }
@@ -153,7 +157,7 @@ export class AuthenticationService {
         return { token: '', user }; // Return empty token, must verify first
     }
 
-    async userLogin(email: string, password: string): Promise<{ token: string; user: IUser }> {
+    async userLogin(email: string, password: string, fcmToken?: string, deviceType?: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
             email: this.getEmailQuery(email),
@@ -179,10 +183,14 @@ export class AuthenticationService {
         user.lastLoginAt = new Date();
         await user.save();
 
+        if (fcmToken) {
+            await this.saveFcmToken(user._id.toString(), fcmToken, deviceType);
+        }
+
         return { token, user };
     }
 
-    async userVerifyEmail(email: string, otp: string): Promise<{ token: string; user: IUser }> {
+    async userVerifyEmail(email: string, otp: string, fcmToken?: string, deviceType?: string): Promise<{ token: string; user: IUser }> {
         email = email.trim().toLowerCase();
         const user = await User.findOne({
             email: this.getEmailQuery(email),
@@ -201,6 +209,10 @@ export class AuthenticationService {
         await user.save();
 
         const token = this.generateToken(user._id.toString(), user.userRole);
+
+        if (fcmToken) {
+            await this.saveFcmToken(user._id.toString(), fcmToken, deviceType);
+        }
 
         return { token, user };
     }
@@ -235,7 +247,7 @@ export class AuthenticationService {
         return { otp }; // Return for testing/dev purposes if needed
     }
 
-    async userVerifyOTP(mobile: string, otp: string): Promise<{ token: string; user: IUser }> {
+    async userVerifyOTP(mobile: string, otp: string, fcmToken?: string, deviceType?: string): Promise<{ token: string; user: IUser }> {
         const user = await User.findOne({
             mobile,
             otp,
@@ -253,6 +265,10 @@ export class AuthenticationService {
         await user.save();
 
         const token = this.generateToken(user._id.toString(), user.userRole);
+
+        if (fcmToken) {
+            await this.saveFcmToken(user._id.toString(), fcmToken, deviceType);
+        }
 
         return { token, user };
     }
@@ -360,6 +376,27 @@ export class AuthenticationService {
             // Mock: Send SMS
             AppLogger.info(`Resending mobile OTP ${otp} to ${data.mobile}`);
         }
+    }
+
+    private async saveFcmToken(userId: string, token: string, deviceType?: string) {
+        const MAX_FCM_TOKENS = 10;
+        await User.updateMany(
+            { _id: { $ne: new mongoose.Types.ObjectId(userId) }, 'fcmTokens.token': token },
+            { $pull: { fcmTokens: { token } } }
+        );
+        await User.updateOne({ _id: userId }, { $pull: { fcmTokens: { token } } });
+        await User.updateOne(
+            { _id: userId },
+            {
+                $push: {
+                    fcmTokens: {
+                        $each: [{ token, deviceType, updatedAt: new Date() }],
+                        $position: 0,
+                        $slice: MAX_FCM_TOKENS,
+                    },
+                },
+            }
+        );
     }
 }
 
