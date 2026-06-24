@@ -40,9 +40,34 @@ export class NotificationService {
       this.sendPush(payload.recipient, payload.title, payload.message, payload.metadata);
     } else if (payload.recipient instanceof mongoose.Types.ObjectId) {
       this.sendPush(payload.recipient.toString(), payload.title, payload.message, payload.metadata);
+    } else if (payload.recipient === 'all') {
+      this.sendPushToAll(payload.title, payload.message, payload.metadata);
     }
 
     return notification;
+  }
+
+  private async sendPushToAll(title: string, body: string, metadata?: any) {
+    try {
+      const users = await mongoose.model('User').find({
+        'fcmTokens.0': { $exists: true }
+      }).select('fcmTokens').lean();
+
+      const tokens = users.flatMap(u => (u.fcmTokens ?? []).map((t: any) => t.token)).filter(Boolean);
+      if (!tokens.length) return;
+
+      const data: Record<string, string> = {};
+      if (metadata) {
+        Object.keys(metadata).forEach((key) => {
+          if (metadata[key] !== undefined && metadata[key] !== null) {
+            data[key] = String(metadata[key]);
+          }
+        });
+      }
+      await this.pushService.notifyTokens(tokens, { title, body, data });
+    } catch (error) {
+      // Fail silently for FCM push error to not break main flow
+    }
   }
 
   private async sendPush(userId: string, title: string, body: string, metadata?: any) {

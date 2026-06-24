@@ -140,3 +140,7 @@ vite.config.ts.timestamp-*
 # src/certs/*.pem
 # src/certs/*.key
 # src/certs/*.crt
+
+# Firebase service account
+firebase.json
+

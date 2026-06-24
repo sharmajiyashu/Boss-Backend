@@ -17,12 +17,24 @@ export default (): admin.app.App | null => {
 
         if (config.firebase.serviceAccountJson) {
             json = JSON.parse(config.firebase.serviceAccountJson) as Record<string, unknown>;
-        } else if (config.firebase.serviceAccountPath) {
-            const resolved = path.isAbsolute(config.firebase.serviceAccountPath)
-                ? config.firebase.serviceAccountPath
-                : path.join(process.cwd(), config.firebase.serviceAccountPath);
-            const raw = fs.readFileSync(resolved, 'utf8');
-            json = JSON.parse(raw) as Record<string, unknown>;
+        } else {
+            let serviceAccountPath = config.firebase.serviceAccountPath;
+            if (!serviceAccountPath) {
+                const defaultPath = path.join(process.cwd(), 'firebase.json');
+                if (fs.existsSync(defaultPath)) {
+                    serviceAccountPath = defaultPath;
+                }
+            }
+
+            if (serviceAccountPath) {
+                const resolved = path.isAbsolute(serviceAccountPath)
+                    ? serviceAccountPath
+                    : path.join(process.cwd(), serviceAccountPath);
+                if (fs.existsSync(resolved)) {
+                    const raw = fs.readFileSync(resolved, 'utf8');
+                    json = JSON.parse(raw) as Record<string, unknown>;
+                }
+            }
         }
 
         if (!json) {

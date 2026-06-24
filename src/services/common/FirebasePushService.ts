@@ -11,39 +11,48 @@ export interface IChatPushPayload {
 
 @Service()
 export class FirebasePushService {
-    constructor(@Inject('firebaseApp') private readonly firebaseApp: admin.app.App | null) {}
+    constructor(@Inject('firebaseApp') private readonly firebaseApp: admin.app.App | null) { }
 
-    public async notifyUser(userId: string, payload: IChatPushPayload): Promise<void> {
+    public async notifyTokens(tokens: string[], payload: IChatPushPayload): Promise<void> {
         if (!this.firebaseApp) {
             AppLogger.warn('FCM skipped: Firebase is not configured');
             return;
         }
-
-        const user = await User.findById(userId).select('fcmTokens').lean();
-        const tokens = (user?.fcmTokens ?? []).map((t) => t.token).filter(Boolean);
-        if (!tokens.length) return;
+        if (!tokens || tokens.length === 0) return;
 
         const messaging = admin.messaging(this.firebaseApp);
         try {
-            const res = await messaging.sendEachForMulticast({
-                tokens,
-                notification: { title: payload.title, body: payload.body },
-                data: payload.data,
-                android: { priority: 'high' },
-                apns: {
-                    payload: {
-                        aps: {
-                            sound: 'default',
-                            'content-available': 1,
+            const chunkSize = 500;
+            for (let i = 0; i < tokens.length; i += chunkSize) {
+                const chunk = tokens.slice(i, i + chunkSize);
+                const res = await messaging.sendEachForMulticast({
+                    tokens: chunk,
+                    notification: { title: payload.title, body: payload.body },
+                    data: payload.data || {},
+                    android: { priority: 'high' },
+                    apns: {
+                        payload: {
+                            aps: {
+                                sound: 'default',
+                                'content-available': 1,
+                            },
                         },
                     },
-                },
-            });
-            if (res.failureCount > 0) {
-                AppLogger.warn(`FCM partial failure: ${res.failureCount}/${tokens.length}`);
+                });
+                if (res.failureCount > 0) {
+                    AppLogger.warn(`FCM partial failure: ${res.failureCount}/${chunk.length}`);
+                }
             }
         } catch (error) {
             AppLogger.error('FCM send failed:', error);
         }
+    }
+
+    public async notifyUser(userId: string, payload: IChatPushPayload): Promise<void> {
+        const user = await User.findById(userId).select('fcmTokens').lean();
+        const tokens = (user?.fcmTokens ?? []).map((t) => t.token).filter(Boolean);
+        if (!tokens.length) return;
+
+        await this.notifyTokens(tokens, payload);
     }
 }
