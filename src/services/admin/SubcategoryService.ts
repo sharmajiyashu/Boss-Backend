@@ -66,6 +66,12 @@ export class SubcategoryService {
                 ...data,
                 customFieldDefinitions: normalizeCustomFieldDefinitions(data.customFieldDefinitions),
             };
+            if (payload.category) {
+                const catStr = String(payload.category);
+                if (catStr === '' || catStr === 'null' || catStr === 'undefined') {
+                    delete payload.category;
+                }
+            }
             const subcategory = await Subcategory.create(payload);
             const populatedSubcategory = await subcategory.populate(['media', { path: 'category', populate: 'media' }]);
             AppLogger.info(`✌️ Subcategory ${populatedSubcategory.name} created successfully.`);
@@ -140,6 +146,16 @@ export class SubcategoryService {
                     customFieldDefinitions: normalizeCustomFieldDefinitions(data.customFieldDefinitions),
                 }
                 : data;
+            if (payload.category) {
+                const catStr = String(payload.category);
+                if (catStr === '' || catStr === 'null' || catStr === 'undefined') {
+                    // @ts-ignore
+                    payload.category = null;
+                }
+            } else if ((payload as any).category === null || (payload as any).category === '') {
+                // @ts-ignore
+                payload.category = null;
+            }
             const updatedSubcategory = await Subcategory.findByIdAndUpdate(id, payload, { new: true })
                 .populate(['media', { path: 'category', populate: 'media' }]);
             if (!updatedSubcategory) {

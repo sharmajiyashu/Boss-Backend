@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import Container from "typedi";
 import { SubcategoryService } from "../../../services/admin/SubcategoryService";
 import { CloudinaryService } from "../../../services/common/CloudinaryService";
@@ -8,6 +8,40 @@ import { validate } from '../../validators';
 import { createSubcategorySchema, getSubcategoryQuerySchema, updateSubcategorySchema } from '../../validators/subcategory';
 import upload from '../../middleware/upload';
 import { MediaType } from '../../../constants/enum';
+
+const parseNestedBody = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body || typeof req.body !== 'object') {
+        return next();
+    }
+
+    const parsedBody: any = {};
+
+    for (const [key, value] of Object.entries(req.body)) {
+        if (key.includes('[') && key.includes(']')) {
+            const tokens = key.split(/[\[\]]+/).filter(Boolean);
+            let current = parsedBody;
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                const nextToken = tokens[i + 1];
+                const isNextNumber = nextToken !== undefined && !isNaN(Number(nextToken));
+
+                if (nextToken === undefined) {
+                    current[token] = value;
+                } else {
+                    if (current[token] === undefined) {
+                        current[token] = isNextNumber ? [] : {};
+                    }
+                    current = current[token];
+                }
+            }
+        } else {
+            parsedBody[key] = value;
+        }
+    }
+
+    req.body = parsedBody;
+    next();
+};
 
 export default (router: Router) => {
     const subcategoryService = Container.get(SubcategoryService);
@@ -32,6 +66,7 @@ export default (router: Router) => {
     // POST /api/admin/subcategories - Create
     router.post('/subcategories',
         upload.single('media'),
+        parseNestedBody,
         validate(createSubcategorySchema),
         async (req: Request, res: Response) => {
             try {
@@ -63,6 +98,7 @@ export default (router: Router) => {
     // PUT /api/admin/subcategories/:id - Update
     router.put('/subcategories/:id',
         upload.single('media'),
+        parseNestedBody,
         validate(updateSubcategorySchema),
         async (req: Request, res: Response) => {
             try {
