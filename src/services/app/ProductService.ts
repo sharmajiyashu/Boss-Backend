@@ -121,8 +121,8 @@ export class ProductService {
       };
     }
 
-    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || 
-        (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
+    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') ||
+      (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
       query.price = {};
       if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
         query.price.$gte = Number(minPrice);
@@ -222,8 +222,22 @@ export class ProductService {
       throw new Error('Please verify your Aadhaar, purchase a subscription, or pay the platform fee to list products.');
     }
 
-    // Check if category points to a parentless Subcategory (so it acts as a Main Category)
-    if (data.category) {
+    // If category is not provided/null but subcategory is provided, resolve the category from the subcategory
+    if ((data.category === undefined || data.category === null || data.category === '') && data.subcategory) {
+      const sub = await Subcategory.findById(data.subcategory);
+      if (sub) {
+        if (sub.category) {
+          data.category = sub.category;
+          data.categoryModel = 'Category';
+        } else {
+          // If the subcategory doesn't have a parent category, it acts as a main category
+          data.category = sub._id;
+          data.categoryModel = 'Subcategory';
+          data.subcategory = undefined;
+        }
+      }
+    } else if (data.category) {
+      // Check if category points to a parentless Subcategory (so it acts as a Main Category)
       const sub = await Subcategory.findById(data.category);
       if (sub && !sub.category) {
         data.categoryModel = 'Subcategory';
@@ -319,8 +333,22 @@ export class ProductService {
   }
 
   public async updateProduct(userId: string, productId: string, data: any) {
-    // Check if category points to a parentless Subcategory
-    if (data.category) {
+    // If category is not provided/null but subcategory is provided, resolve the category from the subcategory
+    if ((data.category === undefined || data.category === null || data.category === '') && data.subcategory) {
+      const sub = await Subcategory.findById(data.subcategory);
+      if (sub) {
+        if (sub.category) {
+          data.category = sub.category;
+          data.categoryModel = 'Category';
+        } else {
+          // If the subcategory doesn't have a parent category, it acts as a main category
+          data.category = sub._id;
+          data.categoryModel = 'Subcategory';
+          data.subcategory = undefined;
+        }
+      }
+    } else if (data.category) {
+      // Check if category points to a parentless Subcategory
       const sub = await Subcategory.findById(data.category);
       if (sub && !sub.category) {
         data.categoryModel = 'Subcategory';
@@ -449,8 +477,8 @@ export class ProductService {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || 
-        (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
+    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') ||
+      (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
       query.price = {};
       if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
         query.price.$gte = Number(minPrice);
