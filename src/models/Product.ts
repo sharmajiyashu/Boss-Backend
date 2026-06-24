@@ -5,6 +5,7 @@ export interface IProduct extends Document {
   description?: string;
   seller: mongoose.Types.ObjectId;
   category: mongoose.Types.ObjectId;
+  categoryModel: 'Category' | 'Subcategory';
   subcategory?: mongoose.Types.ObjectId;
   media: mongoose.Types.ObjectId[];
   price: number;
@@ -31,7 +32,8 @@ const ProductSchema: Schema = new Schema(
     name: { type: String, required: true, trim: true },
     description: { type: String },
     seller: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    category: { type: Schema.Types.ObjectId, refPath: 'categoryModel', required: true },
+    categoryModel: { type: String, required: true, enum: ['Category', 'Subcategory'], default: 'Category' },
     subcategory: { type: Schema.Types.ObjectId, ref: 'Subcategory' },
     media: [{ type: Schema.Types.ObjectId, ref: 'Media' }],
     price: { type: Number, required: true, default: 0 },

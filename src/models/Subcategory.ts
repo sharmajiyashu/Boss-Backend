@@ -7,11 +7,12 @@ export interface IFieldDefinition {
   isFilterable: boolean;
   isRequired: boolean;
   sortOrder?: number;
+  hasOtherOption?: boolean;
 }
 
 export interface ISubcategory extends Document {
   name: string;
-  category: mongoose.Types.ObjectId;
+  category?: mongoose.Types.ObjectId;
   media?: mongoose.Types.ObjectId;
   description?: string;
   customFieldDefinitions?: IFieldDefinition[];
@@ -32,12 +33,13 @@ const FieldDefinitionSchema: Schema = new Schema({
   isFilterable: { type: Boolean, default: false },
   isRequired: { type: Boolean, default: false },
   sortOrder: { type: Number, default: 0 },
+  hasOtherOption: { type: Boolean, default: false },
 }, { _id: false });
 
 const SubcategorySchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    category: { type: Schema.Types.ObjectId, ref: 'Category' },
     media: { type: Schema.Types.ObjectId, ref: 'Media' },
     description: { type: String },
     customFieldDefinitions: [FieldDefinitionSchema],

@@ -6,6 +6,7 @@ import Container from 'typedi';
 
 
 import User from '../../models/User';
+import AppSetting from '../../models/AppSetting';
 
 
 export interface IProductFilters {
@@ -46,7 +47,7 @@ export class ProductService {
       lat,
       lng,
       radius,
-      city,
+      locationRangeId,
       minPrice,
       maxPrice,
       addressId: _addressId,
@@ -73,50 +74,51 @@ export class ProductService {
     let searchLat: number | undefined;
     let searchLng: number | undefined;
 
-    const searchRadiusKm = radius !== undefined && radius !== null && (radius as any) !== '' ? Number(radius) : undefined;
+    let minInMeters = 0;
+    let maxInMeters: number | undefined = undefined;
 
-    // Remove radius filters that are 0 or negative.
-    // If radius is 0 or negative, we do NOT make coordinates query ($near geometry query).
-    if (searchRadiusKm === undefined || searchRadiusKm > 0) {
-      if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
-        searchLat = Number(lat);
-        searchLng = Number(lng);
-      } else if (userId) {
-        const user = await User.findById(userId).select('location');
-        if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
-          searchLat = user.location.lat;
-          searchLng = user.location.lng;
-        }
+    if (locationRangeId) {
+      const settings = await AppSetting.findOne();
+      const range = settings?.locationRanges?.find(r => r.id === locationRangeId);
+      if (range) {
+        minInMeters = range.min * 1000;
+        maxInMeters = range.max * 1000;
       }
-
-      if (searchLat !== undefined && searchLng !== undefined) {
-        isSortingByDistance = true;
-        if (searchRadiusKm !== undefined && searchRadiusKm > 0) {
-          const radiusInMeters = searchRadiusKm * 1000;
-          query.geometry = {
-            $near: {
-              $geometry: {
-                type: 'Point',
-                coordinates: [searchLng, searchLat]
-              },
-              $maxDistance: radiusInMeters
-            }
-          };
-        } else {
-          query.geometry = {
-            $near: {
-              $geometry: {
-                type: 'Point',
-                coordinates: [searchLng, searchLat]
-              }
-            }
-          };
-        }
+    } else if (radius !== undefined && radius !== null && (radius as any) !== '') {
+      const searchRadiusKm = Number(radius);
+      if (searchRadiusKm > 0) {
+        maxInMeters = searchRadiusKm * 1000;
       }
     }
 
-    if (city) {
-      query['location.city'] = { $regex: city, $options: 'i' };
+    if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
+      searchLat = Number(lat);
+      searchLng = Number(lng);
+    } else if (userId) {
+      const user = await User.findById(userId).select('location');
+      if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
+        searchLat = user.location.lat;
+        searchLng = user.location.lng;
+      }
+    }
+
+    if (searchLat !== undefined && searchLng !== undefined) {
+      isSortingByDistance = true;
+      const nearQuery: any = {
+        $geometry: {
+          type: 'Point',
+          coordinates: [searchLng, searchLat]
+        }
+      };
+      if (minInMeters > 0) {
+        nearQuery.$minDistance = minInMeters;
+      }
+      if (maxInMeters !== undefined) {
+        nearQuery.$maxDistance = maxInMeters;
+      }
+      query.geometry = {
+        $near: nearQuery
+      };
     }
 
     if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || 
@@ -220,31 +222,53 @@ export class ProductService {
       throw new Error('Please verify your Aadhaar, purchase a subscription, or pay the platform fee to list products.');
     }
 
-    // 1. Validate custom fields if subcategory is provided
+    // Check if category points to a parentless Subcategory (so it acts as a Main Category)
+    if (data.category) {
+      const sub = await Subcategory.findById(data.category);
+      if (sub && !sub.category) {
+        data.categoryModel = 'Subcategory';
+        data.subcategory = undefined; // Add directly to main category without subcategory
+      } else {
+        data.categoryModel = 'Category';
+      }
+    }
+
+    // 1. Validate custom fields if subcategory or parentless category is provided
+    let fieldSource = null;
     if (data.subcategory) {
-      const subcategory = await Subcategory.findById(data.subcategory);
-      if (subcategory && subcategory.customFieldDefinitions) {
-        const customFields = data.customFields || {};
-        for (const field of subcategory.customFieldDefinitions) {
-          const value = customFields[field.key];
+      fieldSource = await Subcategory.findById(data.subcategory);
+    } else if (data.category) {
+      const sub = await Subcategory.findById(data.category);
+      if (sub && !sub.category) {
+        fieldSource = sub;
+      }
+    }
 
-          // Check required
-          if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
-            throw new Error(`Custom field "${field.label}" is required.`);
+    if (fieldSource && fieldSource.customFieldDefinitions) {
+      const customFields = data.customFields || {};
+      for (const field of fieldSource.customFieldDefinitions) {
+        const value = customFields[field.key];
+
+        // Check required
+        if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
+          throw new Error(`Custom field "${field.label}" is required.`);
+        }
+
+        // Basic type validation (could be more extensive)
+        if (value !== undefined && value !== null) {
+          if (field.fieldType === 'number' && isNaN(Number(value))) {
+            throw new Error(`Custom field "${field.label}" must be a number.`);
           }
-
-          // Basic type validation (could be more extensive)
-          if (value !== undefined && value !== null) {
-            if (field.fieldType === 'number' && isNaN(Number(value))) {
-              throw new Error(`Custom field "${field.label}" must be a number.`);
-            }
-            if (field.fieldType === 'boolean' && typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
-              throw new Error(`Custom field "${field.label}" must be a boolean.`);
-            }
-            if (field.fieldType === 'select' && field.options && !field.options.includes(value)) {
+          if (field.fieldType === 'boolean' && typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
+            throw new Error(`Custom field "${field.label}" must be a boolean.`);
+          }
+          if (field.fieldType === 'select' && field.options) {
+            if (!field.hasOtherOption && !field.options.includes(value)) {
               throw new Error(`Custom field "${field.label}" must be one of: ${field.options.join(', ')}.`);
             }
-            if (field.fieldType === 'multiselect' && field.options) {
+          }
+          if (field.fieldType === 'multiselect' && field.options) {
+            if (!field.hasOtherOption) {
               const values = Array.isArray(value) ? value : (value ? [value] : []);
               for (const val of values) {
                 if (!field.options.includes(val)) {
@@ -295,31 +319,53 @@ export class ProductService {
   }
 
   public async updateProduct(userId: string, productId: string, data: any) {
-    // 1. Validate custom fields if subcategory is provided
+    // Check if category points to a parentless Subcategory
+    if (data.category) {
+      const sub = await Subcategory.findById(data.category);
+      if (sub && !sub.category) {
+        data.categoryModel = 'Subcategory';
+        data.subcategory = undefined; // Update directly to main category without subcategory
+      } else {
+        data.categoryModel = 'Category';
+      }
+    }
+
+    // 1. Validate custom fields if subcategory or parentless category is provided
+    let fieldSource = null;
     if (data.subcategory) {
-      const subcategory = await Subcategory.findById(data.subcategory);
-      if (subcategory && subcategory.customFieldDefinitions) {
-        const customFields = data.customFields || {};
-        for (const field of subcategory.customFieldDefinitions) {
-          const value = customFields[field.key];
+      fieldSource = await Subcategory.findById(data.subcategory);
+    } else if (data.category) {
+      const sub = await Subcategory.findById(data.category);
+      if (sub && !sub.category) {
+        fieldSource = sub;
+      }
+    }
 
-          // Check required
-          if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
-            throw new Error(`Custom field "${field.label}" is required.`);
+    if (fieldSource && fieldSource.customFieldDefinitions) {
+      const customFields = data.customFields || {};
+      for (const field of fieldSource.customFieldDefinitions) {
+        const value = customFields[field.key];
+
+        // Check required
+        if (field.isRequired && (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0))) {
+          throw new Error(`Custom field "${field.label}" is required.`);
+        }
+
+        // Basic type validation
+        if (value !== undefined && value !== null) {
+          if (field.fieldType === 'number' && isNaN(Number(value))) {
+            throw new Error(`Custom field "${field.label}" must be a number.`);
           }
-
-          // Basic type validation
-          if (value !== undefined && value !== null) {
-            if (field.fieldType === 'number' && isNaN(Number(value))) {
-              throw new Error(`Custom field "${field.label}" must be a number.`);
-            }
-            if (field.fieldType === 'boolean' && typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
-              throw new Error(`Custom field "${field.label}" must be a boolean.`);
-            }
-            if (field.fieldType === 'select' && field.options && !field.options.includes(value)) {
+          if (field.fieldType === 'boolean' && typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
+            throw new Error(`Custom field "${field.label}" must be a boolean.`);
+          }
+          if (field.fieldType === 'select' && field.options) {
+            if (!field.hasOtherOption && !field.options.includes(value)) {
               throw new Error(`Custom field "${field.label}" must be one of: ${field.options.join(', ')}.`);
             }
-            if (field.fieldType === 'multiselect' && field.options) {
+          }
+          if (field.fieldType === 'multiselect' && field.options) {
+            if (!field.hasOtherOption) {
               const values = Array.isArray(value) ? value : (value ? [value] : []);
               for (const val of values) {
                 if (!field.options.includes(val)) {
@@ -375,20 +421,51 @@ export class ProductService {
 
     const query: any = { seller: userId };
 
-    if (filters.status) {
-      query.status = filters.status;
+    const {
+      page: _p,
+      limit: _l,
+      categoryId,
+      subcategoryId,
+      search,
+      status,
+      minPrice,
+      maxPrice,
+      ...customFilters
+    } = filters;
+
+    if (status) {
+      query.status = status;
     }
 
-    if (filters.categoryId) {
-      query.category = filters.categoryId;
+    if (categoryId && categoryId !== '') {
+      query.category = categoryId;
     }
 
-    if (filters.subcategoryId) {
-      query.subcategory = filters.subcategoryId;
+    if (subcategoryId && subcategoryId !== '') {
+      query.subcategory = subcategoryId;
     }
 
-    if (filters.search) {
-      query.name = { $regex: filters.search, $options: 'i' };
+    if (search) {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    if ((minPrice !== undefined && minPrice !== null && minPrice !== '') || 
+        (maxPrice !== undefined && maxPrice !== null && maxPrice !== '')) {
+      query.price = {};
+      if (minPrice !== undefined && minPrice !== null && minPrice !== '') {
+        query.price.$gte = Number(minPrice);
+      }
+      if (maxPrice !== undefined && maxPrice !== null && maxPrice !== '') {
+        query.price.$lte = Number(maxPrice);
+      }
+    }
+
+    if (Object.keys(customFilters).length > 0) {
+      for (const key in customFilters) {
+        if (customFilters[key] !== undefined && customFilters[key] !== null && customFilters[key] !== '') {
+          query[`customFields.${key}`] = customFilters[key];
+        }
+      }
     }
 
     const [products, total] = await Promise.all([

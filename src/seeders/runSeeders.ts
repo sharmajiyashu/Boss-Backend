@@ -6,6 +6,7 @@ import { adminSeed } from './adminSeeder';
 import { seedUsers } from './UserSeeder';
 import { seedWorldCities } from './WorldCitySeeder';
 import { seedCMSPages } from './CMSPageSeeder';
+import { seedFAQs } from './FAQSeeder';
 
 async function main() {
   try {
@@ -20,6 +21,7 @@ async function main() {
     await seedUsers();
     await seedWorldCities();
     await seedCMSPages();
+    await seedFAQs();
 
     AppLogger.info('✅ All seeders completed successfully!');
     process.exit(0);

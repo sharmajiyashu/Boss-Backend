@@ -8,11 +8,12 @@ const fieldDefinitionSchema = z.object({
     isFilterable: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),
     isRequired: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').default(false),
     sortOrder: z.coerce.number().optional(),
+    hasOtherOption: z.union([z.boolean(), z.string()]).transform(v => v === true || v === 'true').optional().default(false),
 });
 
 export const createSubcategorySchema = z.object({
     name: z.string().trim().min(3),
-    category: z.string(), // Category ID
+    category: z.string().optional(), // Category ID is optional
     media: z.string().optional(), // Media ID
     description: z.string().optional(),
     customFieldDefinitions: z.array(fieldDefinitionSchema).optional(),

@@ -16,11 +16,29 @@ export class HomeService {
     const subcategoriesRaw = await Subcategory.find({ status: 'active' }).populate('media').lean();
     const subcategories = await this.subcategoryService.attachAvailableProductCounts(subcategoriesRaw);
 
+    // Group parentless subcategories as main categories
+    const parentlessCategories = subcategories
+      .filter(sub => !sub.category)
+      .map(sub => ({
+        _id: sub._id,
+        name: sub.name,
+        media: sub.media,
+        description: sub.description,
+        status: sub.status,
+        customFieldDefinitions: sub.customFieldDefinitions,
+        createdAt: sub.createdAt,
+        updatedAt: sub.updatedAt,
+        subcategories: [],
+        productCount: (sub as any).productCount || 0
+      }));
+
     // Attach subcategories to categories
     const categoriesWithSubcategories = categories.map(category => ({
       ...category,
-      subcategories: subcategories.filter(sub => sub.category.toString() === category._id.toString())
+      subcategories: subcategories.filter(sub => sub.category && sub.category.toString() === category._id.toString())
     }));
+
+    const allCategories = [...categoriesWithSubcategories, ...parentlessCategories];
 
     // 3. Fetch some users
     const users = await User.find({ userRole: 'user' })
@@ -35,7 +53,7 @@ export class HomeService {
     }
 
     return {
-      categories: categoriesWithSubcategories,
+      categories: allCategories,
       users,
       currentUserProfile,
     };

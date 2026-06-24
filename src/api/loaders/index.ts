@@ -10,12 +10,16 @@ import smtpLoader from './smtp';
 export default async (expressApp: Express): Promise<void> => {
     const mongoConnection = await dbLoader();
 
-    // Auto-seed CMS pages if they are missing
+    // Auto-seed CMS pages, settings, and FAQs if missing
     try {
         const { seedCMSPages } = await import('../../seeders/CMSPageSeeder');
         await seedCMSPages();
+        const { seedSettings } = await import('../../seeders/SettingSeeder');
+        await seedSettings();
+        const { seedFAQs } = await import('../../seeders/FAQSeeder');
+        await seedFAQs();
     } catch (err) {
-        AppLogger.error('❌ Failed to run CMS Page Seeder:', err);
+        AppLogger.error('❌ Failed to run auto-seeders:', err);
     }
 
     const cloudinaryClient = await cloudinaryLoader();
