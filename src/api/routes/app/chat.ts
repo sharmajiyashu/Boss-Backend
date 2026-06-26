@@ -14,9 +14,12 @@ import {
     chatMessagesQuerySchema,
     sendChatMessageSchema,
 } from '../../validators/chat';
+import { respondCallMessageSchema } from '../../validators/call';
+import { CallService } from '../../../services/app/CallService';
 
 export default (router: Router) => {
     const chatService = Container.get(ChatService);
+    const callService = Container.get(CallService);
     const cloudinaryService = Container.get(CloudinaryService);
     const mediaService = Container.get(MediaService);
 
@@ -118,6 +121,26 @@ export default (router: Router) => {
                 return ResponseWrapper.success(res, message, 'Message sent', 201);
             } catch (error: any) {
                 const code = error.message === 'Chat not found' ? 404 : 400;
+                return ResponseWrapper.error(res, error.message, code);
+            }
+        }
+    );
+
+    // PATCH /chats/:chatId/messages/:messageId/call-status — accept/reject/cancel call from chat
+    router.patch(
+        '/chats/:chatId/messages/:messageId/call-status',
+        appAuthMiddleware,
+        validate(respondCallMessageSchema),
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.user.id;
+                const chatId = req.params.chatId as string;
+                const messageId = req.params.messageId as string;
+                const { status } = req.body;
+                const result = await callService.respondToCallMessage(userId, chatId, messageId, status);
+                return ResponseWrapper.success(res, result, `Call ${status} successfully`);
+            } catch (error: any) {
+                const code = error.message.includes('not found') ? 404 : 400;
                 return ResponseWrapper.error(res, error.message, code);
             }
         }

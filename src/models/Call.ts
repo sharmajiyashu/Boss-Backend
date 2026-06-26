@@ -3,7 +3,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ICall extends Document {
   caller: mongoose.Types.ObjectId;
   receiver: mongoose.Types.ObjectId;
-  status: 'pending' | 'accepted' | 'rejected' | 'ongoing' | 'completed' | 'missed' | 'declined';
+  product?: mongoose.Types.ObjectId;
+  chatId?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'cancelled' | 'ongoing' | 'completed' | 'missed' | 'declined';
   scheduledTime: Date;
   notes?: string;
   createdAt: Date;
@@ -14,9 +16,11 @@ const CallSchema: Schema = new Schema(
   {
     caller: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     receiver: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    product: { type: Schema.Types.ObjectId, ref: 'Product' },
+    chatId: { type: String, index: true },
     status: { 
       type: String, 
-      enum: ['pending', 'accepted', 'rejected', 'ongoing', 'completed', 'missed', 'declined'], 
+      enum: ['pending', 'accepted', 'rejected', 'cancelled', 'ongoing', 'completed', 'missed', 'declined'], 
       default: 'pending' 
     },
     scheduledTime: { type: Date, required: true },

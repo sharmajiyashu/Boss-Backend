@@ -4,7 +4,7 @@ import { CallService } from '../../../services/app/CallService';
 import { ResponseWrapper } from '../../responseWrapper';
 import { appAuthMiddleware } from '../../middleware/appAuthMiddleware';
 import { validate } from '../../validators';
-import { scheduleCallSchema, updateCallStatusSchema, saveCallHistorySchema } from '../../validators/call';
+import { scheduleCallSchema, updateCallStatusSchema, saveCallHistorySchema, respondCallMessageSchema } from '../../validators/call';
 
 export default (router: Router) => {
   const callService = Container.get(CallService);
@@ -17,9 +17,15 @@ export default (router: Router) => {
     async (req: Request, res: Response) => {
       try {
         const callerId = (req as any).user.id;
-        const { receiverId, scheduledTime, notes } = req.body;
-        const call = await callService.scheduleCall(callerId, receiverId, new Date(scheduledTime), notes);
-        return ResponseWrapper.success(res, call, 'Call scheduled successfully');
+        const { receiverId, scheduledTime, notes, productId } = req.body;
+        const result = await callService.scheduleCall(
+          callerId,
+          receiverId,
+          new Date(scheduledTime),
+          notes,
+          productId
+        );
+        return ResponseWrapper.success(res, result, 'Call scheduled successfully');
       } catch (error: any) {
         return ResponseWrapper.error(res, error.message);
       }

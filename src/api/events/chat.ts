@@ -3,6 +3,8 @@ import { AuthenticatedSocket } from '../middleware/socketAuthMiddleware';
 import Container from 'typedi';
 import AppLogger from '../loaders/logger';
 import { ChatService } from '../../services/app/ChatService';
+import { CallService } from '../../services/app/CallService';
+import Message from '../../models/ChatMessage';
 
 export default (socket: AuthenticatedSocket, io: Server) => {
     if (!socket.userId) {
@@ -12,12 +14,11 @@ export default (socket: AuthenticatedSocket, io: Server) => {
 
     const userId = socket.userId;
     const chatService = Container.get(ChatService);
+    const callService = Container.get(CallService);
 
-    // Join user's personal room for direct notifications/chat list updates
     socket.join(userId);
     AppLogger.info(`Socket ${socket.id} joined personal room ${userId}`);
 
-    // 1. join_room
     socket.on('join_room', (data: { chatId: string }) => {
         const { chatId } = data;
         if (!chatId) return;
@@ -25,7 +26,6 @@ export default (socket: AuthenticatedSocket, io: Server) => {
         AppLogger.info(`User ${userId} joined chat room: ${chatId}`);
     });
 
-    // 2. send_message
     socket.on('send_message', async (payload: {
         chatId: string;
         text?: string;
@@ -40,10 +40,8 @@ export default (socket: AuthenticatedSocket, io: Server) => {
 
             const { message, chat } = await chatService.saveNewMessage(chatId, userId, payload);
 
-            // Broadcast the new message to all participants in the room
             io.to(chatId).emit('new_message', message);
 
-            // Emit chat list update to both participants (room + personal rooms)
             io.to(chatId).emit('chat_list_update', chat);
             const targetUserId = chat.participants.map((p) => p.toString()).find((id) => id !== userId);
             if (targetUserId) {
@@ -55,7 +53,6 @@ export default (socket: AuthenticatedSocket, io: Server) => {
         }
     });
 
-    // 3. mark_as_read
     socket.on('mark_as_read', async (data: { chatId: string }) => {
         try {
             const { chatId } = data;
@@ -63,7 +60,6 @@ export default (socket: AuthenticatedSocket, io: Server) => {
 
             const chat = await chatService.markMessagesAsRead(chatId, userId);
 
-            // Broadcast messages_seen to room
             const now = new Date();
             io.to(chatId).emit('messages_seen', {
                 chatId,
@@ -71,7 +67,6 @@ export default (socket: AuthenticatedSocket, io: Server) => {
                 seenAt: now
             });
 
-            // Emit chat list update to user
             io.to(userId).emit('chat_list_update', chat);
         } catch (error: any) {
             AppLogger.error('Socket mark_as_read error:', error);
@@ -79,15 +74,32 @@ export default (socket: AuthenticatedSocket, io: Server) => {
         }
     });
 
-    // 4. update_message_status
     socket.on('update_message_status', async (data: { chatId: string; messageId: string; status: string }) => {
         try {
             const { chatId, messageId, status } = data;
             if (!chatId || !messageId || !status) return;
 
+            const message = await Message.findOne({ _id: messageId, chatId }).lean();
+
+            if (message?.chat_type === 'call_request' && message.scheduledCallId) {
+                const result = await callService.respondToCallMessage(
+                    userId,
+                    chatId,
+                    messageId,
+                    status as any
+                );
+                socket.emit('call_status_updated', {
+                    callId: result.call._id.toString(),
+                    status,
+                    chatId,
+                    messageId,
+                    result,
+                });
+                return;
+            }
+
             await chatService.updateMessageStatus(chatId, messageId, status);
 
-            // Broadcast status update to room
             io.to(chatId).emit('message_status_updated', {
                 messageId,
                 status

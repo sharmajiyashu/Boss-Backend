@@ -4,6 +4,7 @@ import Chat, { IChat } from '../../models/Chat';
 import Message, { IChatMessage } from '../../models/ChatMessage';
 import User from '../../models/User';
 import { FirebasePushService } from '../common/FirebasePushService';
+import { buildCallRequestPreview, CallStatus } from '../../utils/callHelpers';
 
 export function buildDeterministicRoomId(userIdA: string, userIdB: string): string {
     return [userIdA, userIdB].sort().join('_');
@@ -82,7 +83,7 @@ export class ChatService {
         const uidObj = new mongoose.Types.ObjectId(userId);
         const [chats, total] = await Promise.all([
             Chat.find({ participants: uidObj })
-                .sort({ updatedAt: -1 })
+                .sort({ lastMessageAt: -1, updatedAt: -1 })
                 .skip(skip)
                 .limit(limit)
                 .lean(),
@@ -164,7 +165,12 @@ export class ChatService {
         const now = message.createdAt || new Date();
         chat.lastMessage = message._id as mongoose.Types.ObjectId;
         chat.lastMessageAt = now;
-        chat.lastMessagePreview = text || (media.length ? `[${media.length} image(s)]` : '');
+        if (chat_type === 'call_request') {
+            const callStatus = (payload.status || 'pending') as CallStatus;
+            chat.lastMessagePreview = buildCallRequestPreview(callStatus, message.scheduledTime);
+        } else {
+            chat.lastMessagePreview = text || (media.length ? `[${media.length} image(s)]` : '');
+        }
         chat.lastMessageSenderId = userId;
 
         // Increment target participant's unread count
@@ -189,22 +195,66 @@ export class ChatService {
             .lean();
 
         // Trigger FCM push notification to other user
-        if (targetUserId) {
+        if (targetUserId && !payload.skipFcm) {
             const senderDetails = chat.participantDetails.get(userId);
             const name = senderDetails?.name || 'Someone';
-            await this.firebasePush.notifyUser(targetUserId, {
-                title: name,
-                body: text || 'Sent a photo',
-                data: {
-                    type: 'chat_message',
+
+            if (chat_type === 'call_request') {
+                await this.sendCallRequestPush(targetUserId, userId, {
                     chatId: chat.id,
                     messageId: String(message._id),
-                    senderId: userId,
-                },
-            });
+                    callId: payload.scheduledCallId || '',
+                    status: payload.status || 'pending',
+                    scheduledTime: message.scheduledTime?.toISOString() || '',
+                });
+            } else {
+                await this.firebasePush.notifyUser(targetUserId, {
+                    title: name,
+                    body: text || 'Sent a photo',
+                    data: {
+                        type: 'chat_message',
+                        chatId: chat.id,
+                        messageId: String(message._id),
+                        senderId: userId,
+                    },
+                });
+            }
         }
 
         return { message: populated, chat };
+    }
+
+    public async sendCallRequestPush(
+        recipientId: string,
+        senderId: string,
+        data: {
+            chatId: string;
+            messageId: string;
+            callId: string;
+            status: string;
+            scheduledTime?: string;
+        }
+    ) {
+        const sender = await User.findById(senderId).select('firstName lastName').lean();
+        const name = sender
+            ? `${sender.firstName || ''} ${sender.lastName || ''}`.trim() || 'Someone'
+            : 'Someone';
+
+        await this.firebasePush.notifyUser(recipientId, {
+            title: 'New call request',
+            body: data.scheduledTime
+                ? `${name} scheduled a call`
+                : `${name} sent a call request`,
+            data: {
+                type: 'call_request',
+                chatId: data.chatId,
+                messageId: data.messageId,
+                callId: data.callId,
+                senderId,
+                status: data.status,
+                scheduledTime: data.scheduledTime || '',
+            },
+        });
     }
 
     public async markMessagesAsRead(chatId: string, userId: string) {
@@ -237,7 +287,7 @@ export class ChatService {
         }
 
         message.status = status;
-        message.stataus = status; // Backward compatibility
+        message.stataus = status;
         await message.save();
 
         return message;

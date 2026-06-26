@@ -64,5 +64,6 @@ const ChatMessageSchema: Schema = new Schema(
 );
 
 ChatMessageSchema.index({ chat: 1, createdAt: -1 });
+ChatMessageSchema.index({ scheduledCallId: 1 });
 
 export default mongoose.model<IChatMessage>('Message', ChatMessageSchema);
