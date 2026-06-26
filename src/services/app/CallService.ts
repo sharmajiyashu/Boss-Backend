@@ -1,4 +1,4 @@
-import { Service, Inject } from 'typedi';
+import { Service, Container } from 'typedi';
 import { Server } from 'socket.io';
 import Call from '../../models/Call';
 import CallHistory from '../../models/CallHistory';
@@ -10,9 +10,16 @@ import { ChatService } from './ChatService';
 @Service()
 export class CallService {
   constructor(
-    @Inject('socket') private io: Server,
     private chatService: ChatService
   ) {}
+
+  private get io(): Server | undefined {
+    try {
+      return Container.get<Server>('socket');
+    } catch (error) {
+      return undefined;
+    }
+  }
   /**
    * Schedule a new call
    */
