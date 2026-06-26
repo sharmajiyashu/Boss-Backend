@@ -1,10 +1,18 @@
-import { Service } from 'typedi';
+import { Service, Inject } from 'typedi';
+import { Server } from 'socket.io';
 import Call from '../../models/Call';
 import CallHistory from '../../models/CallHistory';
 import User from '../../models/User';
+import Notification from '../../models/Notification';
+import Message from '../../models/ChatMessage';
+import { ChatService } from './ChatService';
 
 @Service()
 export class CallService {
+  constructor(
+    @Inject('socket') private io: Server,
+    private chatService: ChatService
+  ) {}
   /**
    * Schedule a new call
    */
@@ -27,6 +35,36 @@ export class CallService {
       notes,
     });
 
+    const chat = await this.chatService.getOrCreateDirectChat(callerId, receiverId);
+
+    const { message, chat: updatedChat } = await this.chatService.saveNewMessage(chat.id, callerId, {
+      chat_type: 'call_request',
+      scheduledCallId: call._id.toString(),
+      status: 'pending',
+      scheduledTime: scheduledTime,
+      text: notes || 'Scheduled a call request'
+    });
+
+    await Notification.create({
+      title: 'New Call Request',
+      message: 'You have a new call request',
+      recipient: receiverId,
+      sender: callerId,
+      type: 'call_request',
+      metadata: {
+        callId: call._id.toString(),
+        chatId: chat.id,
+        messageId: message?._id?.toString()
+      }
+    });
+
+    if (this.io) {
+      this.io.to(chat.id).emit('new_message', message);
+      this.io.to(chat.id).emit('chat_list_update', updatedChat);
+      this.io.to(callerId).emit('chat_list_update', updatedChat);
+      this.io.to(receiverId).emit('chat_list_update', updatedChat);
+    }
+
     return call;
   }
 
@@ -46,6 +84,34 @@ export class CallService {
 
     call.status = status as any;
     await call.save();
+
+    const message = await Message.findOne({ scheduledCallId: call._id });
+    if (message) {
+      message.status = status;
+      message.stataus = status; 
+      await message.save();
+
+      if (this.io) {
+        this.io.to(message.chatId).emit('message_status_updated', {
+          messageId: message._id.toString(),
+          status
+        });
+      }
+    }
+
+    if (status === 'accepted' || status === 'rejected') {
+      await Notification.create({
+        title: `Call Request ${status === 'accepted' ? 'Accepted' : 'Rejected'}`,
+        message: `Your call request has been ${status}`,
+        recipient: call.caller,
+        sender: call.receiver,
+        type: 'call_request_update',
+        metadata: {
+          callId: call._id.toString(),
+          status
+        }
+      });
+    }
 
     return call;
   }
