@@ -52,8 +52,8 @@ export class ProductService {
       subcategoryId,
       search,
       status,
-      // lat,
-      // lng,
+      lat,
+      lng,
       radius,
       locationRangeId,
       minPrice,
@@ -100,8 +100,11 @@ export class ProductService {
       }
     }
 
+    let searchedCityName: string | undefined;
+
     // Resolve coordinates based on city search or coordinates/user location
     if (city && city !== '') {
+      searchedCityName = city;
       let cityDoc;
       if (mongoose.Types.ObjectId.isValid(city)) {
         cityDoc = await City.findById(city);
@@ -116,15 +119,15 @@ export class ProductService {
 
     // Fallback if city did not resolve to coordinates
     if (searchLat === undefined || searchLng === undefined) {
-      // if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
-      //   searchLat = Number(lat);
-      //   searchLng = Number(lng);
-      // } else 
-      if (userId) {
+      if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
+        searchLat = Number(lat);
+        searchLng = Number(lng);
+      } else if (userId) {
         const user = await User.findById(userId).select('location addresses');
 
         // Try to resolve coordinates using the user's saved city name from the City database first
         if (user?.location?.city) {
+          searchedCityName = user.location.city;
           const userCityDoc = await City.findOne({ name: { $regex: new RegExp(`^${user.location.city}$`, 'i') }, isActive: true });
           if (userCityDoc) {
             searchLat = userCityDoc.latitude;
@@ -148,7 +151,27 @@ export class ProductService {
       }
     }
 
-    if (searchLat !== undefined && searchLng !== undefined) {
+    if (searchedCityName) {
+      // Match by exact city name or within distance radius
+      const radiusInMeters = maxInMeters || (100 * 1000);
+      const orConditions: any[] = [
+        { 'location.city': { $regex: new RegExp(`^${searchedCityName}$`, 'i') } }
+      ];
+
+      if (searchLat !== undefined && searchLng !== undefined) {
+        orConditions.push({
+          geometry: {
+            $geoWithin: {
+              $centerSphere: [
+                [searchLng, searchLat],
+                (radiusInMeters / 1000) / 6378.1
+              ]
+            }
+          }
+        });
+      }
+      query.$or = orConditions;
+    } else if (searchLat !== undefined && searchLng !== undefined) {
       isSortingByDistance = true;
 
       // Default radius/max distance to 100 km (100000 meters) if not already set
