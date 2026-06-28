@@ -1,4 +1,5 @@
 import { Service } from 'typedi';
+import mongoose from 'mongoose';
 import Product from '../../models/Product';
 import Subcategory from '../../models/Subcategory';
 import { NotificationService } from '../common/NotificationService';
@@ -7,6 +8,7 @@ import Container from 'typedi';
 
 import User from '../../models/User';
 import AppSetting from '../../models/AppSetting';
+import City from '../../models/City';
 
 
 export interface IProductFilters {
@@ -19,6 +21,7 @@ export interface IProductFilters {
   lat?: number;
   lng?: number;
   radius?: number; // In KM
+  city?: string;
   [key: string]: any;
 }
 
@@ -50,6 +53,7 @@ export class ProductService {
       locationRangeId,
       minPrice,
       maxPrice,
+      city,
       addressId: _addressId,
       saveToAddresses: _saveToAddresses,
       label: _label,
@@ -91,19 +95,48 @@ export class ProductService {
       }
     }
 
-    if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
-      searchLat = Number(lat);
-      searchLng = Number(lng);
-    } else if (userId) {
-      const user = await User.findById(userId).select('location');
-      if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
-        searchLat = user.location.lat;
-        searchLng = user.location.lng;
+    // Resolve coordinates based on city search or coordinates/user location
+    if (city && city !== '') {
+      let cityDoc;
+      if (mongoose.Types.ObjectId.isValid(city)) {
+        cityDoc = await City.findById(city);
+      } else {
+        cityDoc = await City.findOne({ name: { $regex: new RegExp(`^${city}$`, 'i') }, isActive: true });
+      }
+      if (cityDoc) {
+        searchLat = cityDoc.latitude;
+        searchLng = cityDoc.longitude;
+      }
+    }
+
+    // Fallback if city did not resolve to coordinates
+    if (searchLat === undefined || searchLng === undefined) {
+      if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
+        searchLat = Number(lat);
+        searchLng = Number(lng);
+      } else if (userId) {
+        const user = await User.findById(userId).select('location addresses');
+        if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
+          searchLat = user.location.lat;
+          searchLng = user.location.lng;
+        } else if (user?.addresses && user.addresses.length > 0) {
+          const defaultAddress = user.addresses.find(addr => addr.isDefault) || user.addresses[0];
+          if (defaultAddress?.lat !== undefined && defaultAddress?.lng !== undefined) {
+            searchLat = defaultAddress.lat;
+            searchLng = defaultAddress.lng;
+          }
+        }
       }
     }
 
     if (searchLat !== undefined && searchLng !== undefined) {
       isSortingByDistance = true;
+
+      // Default radius/max distance to 100 km (100000 meters) if not already set
+      if (maxInMeters === undefined) {
+        maxInMeters = 100 * 1000;
+      }
+
       const nearQuery: any = {
         $geometry: {
           type: 'Point',
