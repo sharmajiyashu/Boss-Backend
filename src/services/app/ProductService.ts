@@ -9,6 +9,7 @@ import Container from 'typedi';
 import User from '../../models/User';
 import AppSetting from '../../models/AppSetting';
 import City from '../../models/City';
+import AppLogger from '../../api/loaders/logger';
 
 
 export interface IProductFilters {
@@ -36,6 +37,10 @@ export interface IPaginatedProducts {
 @Service()
 export class ProductService {
   public async getProducts(filters: IProductFilters, userId?: string): Promise<IPaginatedProducts> {
+    AppLogger.info('--- getProducts API Request ---');
+    AppLogger.info('Filters received:', filters);
+    AppLogger.info('User ID received:', userId);
+
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const skip = (page - 1) * limit;
