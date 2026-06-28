@@ -52,8 +52,8 @@ export class ProductService {
       subcategoryId,
       search,
       status,
-      lat,
-      lng,
+      // lat,
+      // lng,
       radius,
       locationRangeId,
       minPrice,
@@ -116,10 +116,11 @@ export class ProductService {
 
     // Fallback if city did not resolve to coordinates
     if (searchLat === undefined || searchLng === undefined) {
-      if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
-        searchLat = Number(lat);
-        searchLng = Number(lng);
-      } else if (userId) {
+      // if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
+      //   searchLat = Number(lat);
+      //   searchLng = Number(lng);
+      // } else 
+      if (userId) {
         const user = await User.findById(userId).select('location addresses');
 
         // Try to resolve coordinates using the user's saved city name from the City database first
