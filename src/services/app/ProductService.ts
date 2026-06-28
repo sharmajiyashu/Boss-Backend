@@ -121,14 +121,27 @@ export class ProductService {
         searchLng = Number(lng);
       } else if (userId) {
         const user = await User.findById(userId).select('location addresses');
-        if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
-          searchLat = user.location.lat;
-          searchLng = user.location.lng;
-        } else if (user?.addresses && user.addresses.length > 0) {
-          const defaultAddress = user.addresses.find(addr => addr.isDefault) || user.addresses[0];
-          if (defaultAddress?.lat !== undefined && defaultAddress?.lng !== undefined) {
-            searchLat = defaultAddress.lat;
-            searchLng = defaultAddress.lng;
+
+        // Try to resolve coordinates using the user's saved city name from the City database first
+        if (user?.location?.city) {
+          const userCityDoc = await City.findOne({ name: { $regex: new RegExp(`^${user.location.city}$`, 'i') }, isActive: true });
+          if (userCityDoc) {
+            searchLat = userCityDoc.latitude;
+            searchLng = userCityDoc.longitude;
+          }
+        }
+
+        // Fallback to user.location lat/lng directly if city lookup didn't yield coordinates
+        if (searchLat === undefined || searchLng === undefined) {
+          if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
+            searchLat = user.location.lat;
+            searchLng = user.location.lng;
+          } else if (user?.addresses && user.addresses.length > 0) {
+            const defaultAddress = user.addresses.find(addr => addr.isDefault) || user.addresses[0];
+            if (defaultAddress?.lat !== undefined && defaultAddress?.lng !== undefined) {
+              searchLat = defaultAddress.lat;
+              searchLng = defaultAddress.lng;
+            }
           }
         }
       }
