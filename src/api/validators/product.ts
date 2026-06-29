@@ -50,6 +50,8 @@ export const getProductQuerySchema = z.object({
     lng: z.coerce.number().optional(),
     radius: z.coerce.number().optional(),
     city: z.string().optional(),
+    cityId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid City ID").optional(),
+    locationRangeId: z.string().optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),
 }).passthrough();

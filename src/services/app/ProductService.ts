@@ -23,6 +23,8 @@ export interface IProductFilters {
   lng?: number;
   radius?: number; // In KM
   city?: string;
+  cityId?: string;
+  locationRangeId?: string;
   [key: string]: any;
 }
 
@@ -59,6 +61,7 @@ export class ProductService {
       minPrice,
       maxPrice,
       city,
+      cityId,
       addressId: _addressId,
       saveToAddresses: _saveToAddresses,
       label: _label,
@@ -100,16 +103,16 @@ export class ProductService {
       }
     }
 
-    let searchedCityName: string | undefined;
+    const explicitCityParam = (cityId && cityId !== '') ? cityId : city;
+    const isExplicitCitySearch = !!(explicitCityParam && explicitCityParam !== '');
 
-    // Resolve coordinates based on city search or coordinates/user location
-    if (city && city !== '') {
-      searchedCityName = city;
+    // Resolve coordinates: { $near } center point
+    if (isExplicitCitySearch) {
       let cityDoc;
-      if (mongoose.Types.ObjectId.isValid(city)) {
-        cityDoc = await City.findById(city);
+      if (mongoose.Types.ObjectId.isValid(explicitCityParam)) {
+        cityDoc = await City.findById(explicitCityParam);
       } else {
-        cityDoc = await City.findOne({ name: { $regex: new RegExp(`^${city}$`, 'i') }, isActive: true });
+        cityDoc = await City.findOne({ name: { $regex: new RegExp(`^${explicitCityParam}$`, 'i') }, isActive: true });
       }
       if (cityDoc) {
         searchLat = cityDoc.latitude;
@@ -117,7 +120,7 @@ export class ProductService {
       }
     }
 
-    // Fallback if city did not resolve to coordinates
+    // Default: sort by user location (or lat/lng params) — show all products, no city filter
     if (searchLat === undefined || searchLng === undefined) {
       if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
         searchLat = Number(lat);
@@ -125,9 +128,7 @@ export class ProductService {
       } else if (userId) {
         const user = await User.findById(userId).select('location addresses');
 
-        // Try to resolve coordinates using the user's saved city name from the City database first
         if (user?.location?.city) {
-          searchedCityName = user.location.city;
           const userCityDoc = await City.findOne({ name: { $regex: new RegExp(`^${user.location.city}$`, 'i') }, isActive: true });
           if (userCityDoc) {
             searchLat = userCityDoc.latitude;
@@ -135,7 +136,6 @@ export class ProductService {
           }
         }
 
-        // Fallback to user.location lat/lng directly if city lookup didn't yield coordinates
         if (searchLat === undefined || searchLng === undefined) {
           if (user?.location?.lat !== undefined && user?.location?.lng !== undefined) {
             searchLat = user.location.lat;
@@ -151,33 +151,8 @@ export class ProductService {
       }
     }
 
-    if (searchedCityName) {
-      // Match by exact city name or within distance radius
-      const radiusInMeters = maxInMeters || (100 * 1000);
-      const orConditions: any[] = [
-        { 'location.city': { $regex: new RegExp(`^${searchedCityName}$`, 'i') } }
-      ];
-
-      if (searchLat !== undefined && searchLng !== undefined) {
-        orConditions.push({
-          geometry: {
-            $geoWithin: {
-              $centerSphere: [
-                [searchLng, searchLat],
-                (radiusInMeters / 1000) / 6378.1
-              ]
-            }
-          }
-        });
-      }
-      query.$or = orConditions;
-    } else if (searchLat !== undefined && searchLng !== undefined) {
+    if (searchLat !== undefined && searchLng !== undefined) {
       isSortingByDistance = true;
-
-      // Default radius/max distance to 100 km (100000 meters) if not already set
-      if (maxInMeters === undefined) {
-        maxInMeters = 100 * 1000;
-      }
 
       const nearQuery: any = {
         $geometry: {
@@ -185,12 +160,19 @@ export class ProductService {
           coordinates: [searchLng, searchLat]
         }
       };
-      if (minInMeters > 0) {
-        nearQuery.$minDistance = minInMeters;
+
+      // Apply distance range filter when cityId is passed or a range/radius is specified
+      const shouldApplyDistanceFilter = isExplicitCitySearch || locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== '');
+
+      if (shouldApplyDistanceFilter) {
+        if (minInMeters > 0) {
+          nearQuery.$minDistance = minInMeters;
+        }
+        if (maxInMeters !== undefined) {
+          nearQuery.$maxDistance = maxInMeters;
+        }
       }
-      if (maxInMeters !== undefined) {
-        nearQuery.$maxDistance = maxInMeters;
-      }
+
       query.geometry = {
         $near: nearQuery
       };
