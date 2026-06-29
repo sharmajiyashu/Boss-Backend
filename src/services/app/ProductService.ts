@@ -9,8 +9,10 @@ import Container from 'typedi';
 import User from '../../models/User';
 import AppSetting from '../../models/AppSetting';
 import City from '../../models/City';
+import Category from '../../models/Category';
+import State from '../../models/State';
+import Country from '../../models/Country';
 import AppLogger from '../../api/loaders/logger';
-
 
 export interface IProductFilters {
   categoryId?: string;
@@ -38,6 +40,78 @@ export interface IPaginatedProducts {
 
 @Service()
 export class ProductService {
+  private escapeRegex(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  private buildTextRegex(term: string) {
+    return { $regex: this.escapeRegex(term), $options: 'i' };
+  }
+
+  private async buildSearchOrConditions(term: string): Promise<any[]> {
+    const regex = this.buildTextRegex(term);
+    const orConditions: any[] = [];
+
+    orConditions.push({ name: regex });
+    orConditions.push({ description: regex });
+
+    const [categoryIds, subcategoryIds] = await Promise.all([
+      Category.find({ name: regex }).distinct('_id'),
+      Subcategory.find({ name: regex }).distinct('_id'),
+    ]);
+
+    if (categoryIds.length) {
+      orConditions.push({ category: { $in: categoryIds }, categoryModel: 'Category' });
+    }
+    if (subcategoryIds.length) {
+      orConditions.push({ category: { $in: subcategoryIds }, categoryModel: 'Subcategory' });
+      orConditions.push({ subcategory: { $in: subcategoryIds } });
+    }
+
+    orConditions.push({ 'location.city': regex });
+    orConditions.push({ 'location.state': regex });
+
+    const cityNames = await City.find({ name: regex, isActive: true }).distinct('name');
+    if (cityNames.length) {
+      orConditions.push({ 'location.city': { $in: cityNames } });
+    }
+
+    const states = await State.find({ name: regex, isActive: true }).select('_id name');
+    if (states.length) {
+      orConditions.push({ 'location.state': { $in: states.map(s => s.name) } });
+      const stateIds = states.map(s => s._id);
+      const citiesInStates = await City.find({ stateId: { $in: stateIds }, isActive: true }).distinct('name');
+      if (citiesInStates.length) {
+        orConditions.push({ 'location.city': { $in: citiesInStates } });
+      }
+    }
+
+    const countries = await Country.find({ name: regex, isActive: true }).select('_id');
+    if (countries.length) {
+      const countryIds = countries.map(c => c._id);
+      const [stateNames, citiesInCountries] = await Promise.all([
+        State.find({ countryId: { $in: countryIds }, isActive: true }).distinct('name'),
+        City.find({ countryId: { $in: countryIds }, isActive: true }).distinct('name'),
+      ]);
+      if (stateNames.length) {
+        orConditions.push({ 'location.state': { $in: stateNames } });
+      }
+      if (citiesInCountries.length) {
+        orConditions.push({ 'location.city': { $in: citiesInCountries } });
+      }
+    }
+
+    return orConditions;
+  }
+
+  private async applyProductSearchFilters(query: Record<string, any>, search?: string): Promise<void> {
+    const searchTerm = search?.trim();
+    if (!searchTerm) return;
+
+    const orConditions = await this.buildSearchOrConditions(searchTerm);
+    Object.assign(query, orConditions.length ? { $or: orConditions } : { _id: { $in: [] } });
+  }
+
   public async getProducts(filters: IProductFilters, userId?: string): Promise<IPaginatedProducts> {
     AppLogger.info('--- getProducts API Request ---');
     AppLogger.info('Filters received:', filters);
@@ -78,9 +152,7 @@ export class ProductService {
       query.subcategory = subcategoryId;
     }
 
-    if (search) {
-      query.name = { $regex: search, $options: 'i' };
-    }
+    await this.applyProductSearchFilters(query, search);
 
     let isSortingByDistance = false;
     let searchLat: number | undefined;
