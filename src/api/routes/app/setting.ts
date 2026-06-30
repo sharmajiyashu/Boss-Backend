@@ -32,6 +32,8 @@ export default (router: Router) => {
           { id: 'range_5', min: 50, max: 100, label: '50 to 100 km' },
           { id: 'range_6', min: 100, max: 500, label: '100+ km' }
         ],
+        defaultNearbyEnabled: settings?.defaultNearbyEnabled ?? false,
+        defaultNearbyDistanceKm: settings?.defaultNearbyDistanceKm ?? 50,
         cmsPages: cmsPages,
         faqs: faqs,
         termsAndConditions: termsPage?.content ?? '',

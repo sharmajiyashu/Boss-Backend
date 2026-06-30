@@ -15,7 +15,9 @@ export async function seedSettings() {
           { id: 'range_4', min: 20, max: 50, label: '20 to 50 km' },
           { id: 'range_5', min: 50, max: 100, label: '50 to 100 km' },
           { id: 'range_6', min: 100, max: 500, label: '100+ km' }
-        ]
+        ],
+        defaultNearbyEnabled: false,
+        defaultNearbyDistanceKm: 50,
       });
       AppLogger.info('🌱 Seeded default App Settings.');
     }

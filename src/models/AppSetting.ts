@@ -11,6 +11,8 @@ export interface IAppSetting extends Document {
   platformFees: number;
   reportReasons: string[];
   locationRanges: ILocationRange[];
+  defaultNearbyEnabled: boolean;
+  defaultNearbyDistanceKm: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +38,8 @@ const AppSettingSchema: Schema = new Schema(
         { id: 'range_2', min: 10, max: 50, label: '10 to 50 km' }
       ]
     },
+    defaultNearbyEnabled: { type: Boolean, default: false },
+    defaultNearbyDistanceKm: { type: Number, default: 50, min: 1 },
   },
   {
     timestamps: true,

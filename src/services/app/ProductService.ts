@@ -254,8 +254,11 @@ export class ProductService {
     let minInMeters = 0;
     let maxInMeters: number | undefined = undefined;
 
+    const settings = await AppSetting.findOne();
+    const hasExplicitDistanceFilter =
+      !!(locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== '' && Number(radius) > 0));
+
     if (locationRangeId) {
-      const settings = await AppSetting.findOne();
       const range = settings?.locationRanges?.find(r => r.id === locationRangeId);
       if (range) {
         minInMeters = range.min * 1000;
@@ -344,9 +347,18 @@ export class ProductService {
         }
       };
 
-      const shouldApplyDistanceFilter = !!(locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== ''));
+      const useDefaultNearby =
+        !hasExplicitDistanceFilter &&
+        !hasLocationIdFilter &&
+        settings?.defaultNearbyEnabled === true &&
+        settings.defaultNearbyDistanceKm > 0;
+
+      const shouldApplyDistanceFilter = hasExplicitDistanceFilter || useDefaultNearby;
 
       if (shouldApplyDistanceFilter) {
+        if (useDefaultNearby && maxInMeters === undefined) {
+          maxInMeters = settings!.defaultNearbyDistanceKm * 1000;
+        }
         if (minInMeters > 0) {
           nearQuery.$minDistance = minInMeters;
         }
