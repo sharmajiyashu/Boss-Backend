@@ -51,6 +51,8 @@ export const getProductQuerySchema = z.object({
     radius: z.coerce.number().optional(),
     city: z.string().optional(),
     cityId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid City ID").optional(),
+    stateId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid State ID").optional(),
+    countryId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Country ID").optional(),
     locationRangeId: z.string().optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),

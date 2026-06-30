@@ -26,6 +26,8 @@ export interface IProductFilters {
   radius?: number; // In KM
   city?: string;
   cityId?: string;
+  stateId?: string;
+  countryId?: string;
   locationRangeId?: string;
   [key: string]: any;
 }
@@ -104,6 +106,97 @@ export class ProductService {
     return orConditions;
   }
 
+  private appendAndCondition(query: Record<string, any>, condition: Record<string, any>): void {
+    if (!query.$and) {
+      query.$and = [];
+      if (query.$or) {
+        query.$and.push({ $or: query.$or });
+        delete query.$or;
+      }
+    }
+    query.$and.push(condition);
+  }
+
+  private async applyLocationIdFilters(
+    query: Record<string, any>,
+    filters: { cityId?: string; stateId?: string; countryId?: string },
+    geoRange?: { maxInMeters?: number }
+  ): Promise<{ sortLat?: number; sortLng?: number }> {
+    const { cityId, stateId, countryId } = filters;
+
+    if (cityId && cityId !== '') {
+      const cityDoc = await City.findById(cityId);
+      if (!cityDoc) {
+        this.appendAndCondition(query, { _id: { $in: [] } });
+        return {};
+      }
+
+      const cityOr: any[] = [
+        { 'location.city': { $regex: new RegExp(`^${this.escapeRegex(cityDoc.name)}$`, 'i') } },
+      ];
+
+      if (geoRange?.maxInMeters && cityDoc.latitude !== undefined && cityDoc.longitude !== undefined) {
+        cityOr.push({
+          geometry: {
+            $geoWithin: {
+              $centerSphere: [
+                [cityDoc.longitude, cityDoc.latitude],
+                geoRange.maxInMeters / 1000 / 6378.1,
+              ],
+            },
+          },
+        });
+      }
+
+      this.appendAndCondition(query, cityOr.length === 1 ? cityOr[0] : { $or: cityOr });
+      return { sortLat: cityDoc.latitude, sortLng: cityDoc.longitude };
+    }
+
+    if (stateId && stateId !== '') {
+      const stateDoc = await State.findById(stateId);
+      if (!stateDoc) {
+        this.appendAndCondition(query, { _id: { $in: [] } });
+        return {};
+      }
+
+      const stateOr: any[] = [
+        { 'location.state': { $regex: new RegExp(`^${this.escapeRegex(stateDoc.name)}$`, 'i') } },
+      ];
+      const cityNames = await City.find({ stateId: stateDoc._id, isActive: true }).distinct('name');
+      if (cityNames.length) {
+        stateOr.push({ 'location.city': { $in: cityNames } });
+      }
+
+      this.appendAndCondition(query, stateOr.length === 1 ? stateOr[0] : { $or: stateOr });
+      return {};
+    }
+
+    if (countryId && countryId !== '') {
+      const countryDoc = await Country.findById(countryId);
+      if (!countryDoc) {
+        this.appendAndCondition(query, { _id: { $in: [] } });
+        return {};
+      }
+
+      const [stateNames, cityNames] = await Promise.all([
+        State.find({ countryId: countryDoc._id, isActive: true }).distinct('name'),
+        City.find({ countryId: countryDoc._id, isActive: true }).distinct('name'),
+      ]);
+
+      const countryOr: any[] = [];
+      if (stateNames.length) countryOr.push({ 'location.state': { $in: stateNames } });
+      if (cityNames.length) countryOr.push({ 'location.city': { $in: cityNames } });
+
+      if (!countryOr.length) {
+        this.appendAndCondition(query, { _id: { $in: [] } });
+      } else {
+        this.appendAndCondition(query, countryOr.length === 1 ? countryOr[0] : { $or: countryOr });
+      }
+    }
+
+    return {};
+  }
+
   private async applyProductSearchFilters(query: Record<string, any>, search?: string): Promise<void> {
     const searchTerm = search?.trim();
     if (!searchTerm) return;
@@ -136,6 +229,8 @@ export class ProductService {
       maxPrice,
       city,
       cityId,
+      stateId,
+      countryId,
       addressId: _addressId,
       saveToAddresses: _saveToAddresses,
       label: _label,
@@ -155,8 +250,6 @@ export class ProductService {
     await this.applyProductSearchFilters(query, search);
 
     let isSortingByDistance = false;
-    let searchLat: number | undefined;
-    let searchLng: number | undefined;
 
     let minInMeters = 0;
     let maxInMeters: number | undefined = undefined;
@@ -175,16 +268,33 @@ export class ProductService {
       }
     }
 
-    const explicitCityParam = (cityId && cityId !== '') ? cityId : city;
-    const isExplicitCitySearch = !!(explicitCityParam && explicitCityParam !== '');
+    const hasLocationIdFilter = !!(
+      (cityId && cityId !== '') ||
+      (stateId && stateId !== '') ||
+      (countryId && countryId !== '')
+    );
 
-    // Resolve coordinates: { $near } center point
-    if (isExplicitCitySearch) {
+    const geoRangeForFilter =
+      locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== '' && Number(radius) > 0)
+        ? { maxInMeters }
+        : undefined;
+
+    const { sortLat: locationSortLat, sortLng: locationSortLng } = await this.applyLocationIdFilters(
+      query,
+      { cityId, stateId, countryId },
+      hasLocationIdFilter && cityId ? geoRangeForFilter : undefined
+    );
+
+    let searchLat: number | undefined = locationSortLat;
+    let searchLng: number | undefined = locationSortLng;
+
+    // Legacy city name param — coordinates only when no cityId/stateId/countryId
+    if (!hasLocationIdFilter && city && city !== '') {
       let cityDoc;
-      if (mongoose.Types.ObjectId.isValid(explicitCityParam)) {
-        cityDoc = await City.findById(explicitCityParam);
+      if (mongoose.Types.ObjectId.isValid(city)) {
+        cityDoc = await City.findById(city);
       } else {
-        cityDoc = await City.findOne({ name: { $regex: new RegExp(`^${explicitCityParam}$`, 'i') }, isActive: true });
+        cityDoc = await City.findOne({ name: { $regex: new RegExp(`^${city}$`, 'i') }, isActive: true });
       }
       if (cityDoc) {
         searchLat = cityDoc.latitude;
@@ -192,8 +302,8 @@ export class ProductService {
       }
     }
 
-    // Default: sort by user location (or lat/lng params) — show all products, no city filter
-    if (searchLat === undefined || searchLng === undefined) {
+    // Default: sort by user location when no location ID filter
+    if (!hasLocationIdFilter && (searchLat === undefined || searchLng === undefined)) {
       if (lat !== undefined && lat !== null && (lat as any) !== '' && lng !== undefined && lng !== null && (lng as any) !== '') {
         searchLat = Number(lat);
         searchLng = Number(lng);
@@ -223,7 +333,8 @@ export class ProductService {
       }
     }
 
-    if (searchLat !== undefined && searchLng !== undefined) {
+    // Distance sort only when browsing without city/state/country ID filters
+    if (!hasLocationIdFilter && searchLat !== undefined && searchLng !== undefined) {
       isSortingByDistance = true;
 
       const nearQuery: any = {
@@ -233,8 +344,7 @@ export class ProductService {
         }
       };
 
-      // Apply distance range filter when cityId is passed or a range/radius is specified
-      const shouldApplyDistanceFilter = isExplicitCitySearch || locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== '');
+      const shouldApplyDistanceFilter = !!(locationRangeId || (radius !== undefined && radius !== null && (radius as any) !== ''));
 
       if (shouldApplyDistanceFilter) {
         if (minInMeters > 0) {
