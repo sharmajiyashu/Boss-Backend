@@ -781,5 +781,10 @@ export class ProductService {
   public async updateProductStatus(productId: string, status: 'pending' | 'approved' | 'rejected' | 'sold' | 'inactive') {
     return Product.findByIdAndUpdate(productId, { status }, { new: true });
   }
+
+  public async deleteProduct(productId: string) {
+    return Product.findByIdAndDelete(productId);
+  }
 }
+
 

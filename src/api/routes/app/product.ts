@@ -234,5 +234,34 @@ export default (router: Router) => {
       }
     }
   );
+
+  // DELETE /api/products/:id - Delete a product listing
+  router.delete('/products/:id',
+    appAuthMiddleware,
+    async (req: Request, res: Response) => {
+      try {
+        const userId = (req as any).user.id;
+        const productId = req.params.id as string;
+        const isAdmin = !!(req as any).user.adminRoleId;
+
+        if (!/^[0-9a-fA-F]{24}$/.test(productId)) {
+          return ResponseWrapper.error(res, 'Invalid Product ID', 400);
+        }
+
+        const product = await productService.getProductById(productId);
+        if (!product) return ResponseWrapper.error(res, 'Product not found', 404);
+
+        if (!isAdmin && product.seller._id.toString() !== userId) {
+          return ResponseWrapper.error(res, 'Unauthorized to delete this product', 403);
+        }
+
+        await productService.deleteProduct(productId);
+        return ResponseWrapper.success(res, null, 'Product deleted successfully');
+      } catch (error: any) {
+        return ResponseWrapper.error(res, error.message);
+      }
+    }
+  );
 };
+
 
