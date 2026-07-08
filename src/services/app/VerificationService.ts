@@ -15,6 +15,16 @@ export class VerificationService {
   }
 
   public async sendOtp(userId: string, aadhaarNumber: string) {
+    const existingUser = await User.findOne({
+      'aadhaarVerification.aadhaarNumber': aadhaarNumber,
+      'aadhaarVerification.status': 'verified',
+      _id: { $ne: userId },
+    });
+
+    if (existingUser) {
+      throw new Error('This Aadhaar number is already in use by another account');
+    }
+
     const token = this.generateJwt();
     try {
       const response = await axios.post(
