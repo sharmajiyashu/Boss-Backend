@@ -5,6 +5,7 @@ import AppLogger from '../api/loaders/logger';
 import { adminSeed } from './adminSeeder';
 import { seedUsers } from './UserSeeder';
 import { seedWorldCities } from './WorldCitySeeder';
+import { seedIndiaLocations } from './IndiaLocationSeeder';
 import { seedCMSPages } from './CMSPageSeeder';
 import { seedFAQs } from './FAQSeeder';
 
@@ -19,7 +20,8 @@ async function main() {
     await seedSettings();
     await adminSeed();
     await seedUsers();
-    await seedWorldCities();
+    // await seedWorldCities();
+    await seedIndiaLocations();
     await seedCMSPages();
     await seedFAQs();
 
