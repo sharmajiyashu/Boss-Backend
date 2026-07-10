@@ -312,4 +312,52 @@ export class ChatService {
         await this.markMessagesAsRead(chatId, userId);
         return { ok: true };
     }
+
+    public async deleteChat(chatId: string, userId: string) {
+        const chat = await Chat.findOne({ id: chatId });
+        if (!chat || !chat.participants.some((p) => p.toString() === userId)) {
+            throw new Error('Chat not found');
+        }
+
+        await Message.deleteMany({ chatId });
+        await Chat.deleteOne({ id: chatId });
+
+        return { success: true };
+    }
+
+    public async deleteMessage(chatId: string, messageId: string, userId: string) {
+        const chat = await Chat.findOne({ id: chatId });
+        if (!chat || !chat.participants.some((p) => p.toString() === userId)) {
+            throw new Error('Chat not found');
+        }
+
+        const message = await Message.findOne({ _id: messageId, chatId });
+        if (!message) {
+            throw new Error('Message not found');
+        }
+
+        await Message.deleteOne({ _id: messageId });
+
+        if (chat.lastMessage?.toString() === messageId) {
+            const lastMsg = await Message.findOne({ chatId }).sort({ createdAt: -1 });
+            if (lastMsg) {
+                chat.lastMessage = lastMsg._id as mongoose.Types.ObjectId;
+                chat.lastMessageAt = lastMsg.createdAt;
+                chat.lastMessageSenderId = lastMsg.sender.toString();
+                if (lastMsg.chat_type === 'call_request') {
+                    chat.lastMessagePreview = buildCallRequestPreview(lastMsg.status as any, lastMsg.scheduledTime);
+                } else {
+                    chat.lastMessagePreview = lastMsg.text || (lastMsg.media.length ? `[${lastMsg.media.length} image(s)]` : '');
+                }
+            } else {
+                chat.lastMessage = undefined;
+                chat.lastMessageAt = undefined;
+                chat.lastMessageSenderId = '';
+                chat.lastMessagePreview = '';
+            }
+            await chat.save();
+        }
+
+        return { success: true };
+    }
 }

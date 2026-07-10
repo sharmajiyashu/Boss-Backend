@@ -162,4 +162,39 @@ export default (router: Router) => {
             }
         }
     );
+
+    // DELETE /chats/:chatId — Delete a chat and all its messages
+    router.delete(
+        '/chats/:chatId',
+        appAuthMiddleware,
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.user.id;
+                const chatId = req.params.chatId as string;
+                const result = await chatService.deleteChat(chatId, userId);
+                return ResponseWrapper.success(res, result, 'Chat deleted successfully');
+            } catch (error: any) {
+                const code = error.message === 'Chat not found' ? 404 : 400;
+                return ResponseWrapper.error(res, error.message, code);
+            }
+        }
+    );
+
+    // DELETE /chats/:chatId/messages/:messageId — Delete a message in a chat
+    router.delete(
+        '/chats/:chatId/messages/:messageId',
+        appAuthMiddleware,
+        async (req: Request, res: Response) => {
+            try {
+                const userId = req.user.id;
+                const chatId = req.params.chatId as string;
+                const messageId = req.params.messageId as string;
+                const result = await chatService.deleteMessage(chatId, messageId, userId);
+                return ResponseWrapper.success(res, result, 'Message deleted successfully');
+            } catch (error: any) {
+                const code = error.message.includes('not found') ? 404 : 400;
+                return ResponseWrapper.error(res, error.message, code);
+            }
+        }
+    );
 };
